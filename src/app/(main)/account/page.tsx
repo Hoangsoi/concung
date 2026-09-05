@@ -1,447 +1,292 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  User,
-  Package,
-  MapPin,
-  Award,
-  LogOut,
-  Phone,
-  Lock,
-  Eye,
-  EyeOff,
-  CheckSquare,
-  ArrowRight,
-  ShieldCheck,
-} from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { formatVND } from "@/lib/utils";
+import { Star, Phone, CalendarDays, Landmark, ChevronRight, Shield, LogOut, X, CheckCircle2, Edit3, Trash2 } from "lucide-react";
+import styles from "./account.module.css";
 
-export interface UserSession {
-  id?: number;
-  fullName: string;
-  phone: string;
-  email?: string;
-  memberTier?: string;
-  rewardPoints?: number;
-}
+type Profile = { fullName: string; phone: string; createdAt: string | null };
+
+export type LinkedBank = {
+  bankName: string;
+  accountNumber: string;
+  accountHolder: string;
+  linkedAt?: string;
+};
+
+const POPULAR_BANKS = [
+  "Vietcombank (VCB)",
+  "Techcombank (TCB)",
+  "MB Bank (MB)",
+  "VietinBank (CTG)",
+  "BIDV",
+  "VPBank",
+  "ACB",
+  "Agribank",
+  "Sacombank",
+  "TPBank",
+  "VIB",
+  "MSB",
+  "MoMo (Ví điện tử)",
+];
 
 export default function AccountPage() {
+  const [user, setUser] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [guest, setGuest] = useState(false);
+  const [error, setError] = useState("");
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  // Bank account linkage states
+  const [linkedBank, setLinkedBank] = useState<LinkedBank | null>(null);
+  const [isEditingBank, setIsEditingBank] = useState(false);
+  const [selectedBank, setSelectedBank] = useState(POPULAR_BANKS[0]);
+  const [accountNumber, setAccountNumber] = useState("");
+  const [accountHolder, setAccountHolder] = useState("");
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [bankFormError, setBankFormError] = useState("");
+
+  const dialog = useRef<HTMLDialogElement>(null);
   const router = useRouter();
-  const [user, setUser] = useState<UserSession | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"orders" | "profile" | "addresses">("orders");
 
-  // Login Form States (for Guest view)
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [agreed, setAgreed] = useState(true);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Check login state from localStorage
-  const checkUserSession = () => {
+  async function load() {
+    setLoading(true); setError("");
     try {
-      const savedUser = localStorage.getItem("user");
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
+      const response = await fetch("/api/account", { cache: "no-store" });
+      if (response.status === 401) { setGuest(true); setUser(null); return; }
+      if (!response.ok) throw new Error();
+      const data = await response.json(); setUser(data.user); setGuest(false);
+    } catch { setError("Không tải được thông tin từ hệ thống. Ba mẹ vui lòng thử lại."); }
+    finally { setLoading(false); }
+  }
+
+  // Load saved bank account from localStorage
+  const loadSavedBank = () => {
+    try {
+      const saved = localStorage.getItem("concung_bank_account");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setLinkedBank(parsed);
+        setSelectedBank(parsed.bankName || POPULAR_BANKS[0]);
+        setAccountNumber(parsed.accountNumber || "");
+        setAccountHolder(parsed.accountHolder || "");
       } else {
-        setUser(null);
+        setLinkedBank(null);
       }
     } catch {
-      setUser(null);
-    } finally {
-      setIsLoading(false);
+      setLinkedBank(null);
     }
   };
 
   useEffect(() => {
-    checkUserSession();
-    window.addEventListener("user-auth-change", checkUserSession);
-    window.addEventListener("storage", checkUserSession);
+    void load();
+    loadSavedBank();
+
+    window.addEventListener("bank-account-changed", loadSavedBank);
     return () => {
-      window.removeEventListener("user-auth-change", checkUserSession);
-      window.removeEventListener("storage", checkUserSession);
+      window.removeEventListener("bank-account-changed", loadSavedBank);
     };
   }, []);
 
-  // Handle Login Submit for Guest
-  const handleLoginSubmit = async (e: React.FormEvent) => {
+  async function logout() {
+    setLoggingOut(true); setError("");
+    try {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (!response.ok) throw new Error();
+      localStorage.removeItem("user"); window.dispatchEvent(new Event("user-auth-change"));
+      setUser(null); router.replace("/auth"); router.refresh();
+    } catch { setError("Chưa đăng xuất được. Vui lòng thử lại."); setLoggingOut(false); }
+  }
+
+  // Save bank account permanently
+  const handleSaveBank = (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError(null);
+    setBankFormError("");
+    setSaveSuccess(false);
 
-    if (!phone.trim()) {
-      setFormError("Vui lòng nhập số điện thoại");
+    if (!accountNumber.trim()) {
+      setBankFormError("Vui lòng nhập số tài khoản ngân hàng.");
       return;
     }
-    if (!password.trim()) {
-      setFormError("Vui lòng nhập mật khẩu");
+    if (!accountHolder.trim()) {
+      setBankFormError("Vui lòng nhập tên chủ tài khoản.");
       return;
     }
 
-    setIsSubmitting(true);
+    const bankData: LinkedBank = {
+      bankName: selectedBank,
+      accountNumber: accountNumber.trim(),
+      accountHolder: accountHolder.trim().toUpperCase(),
+      linkedAt: new Date().toLocaleDateString("vi-VN"),
+    };
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: phone.trim(), password: password.trim() }),
-      });
-
-      const result = await res.json();
-
-      if (!res.ok) {
-        // Fallback for demo login if db is not connected
-        const demoUser: UserSession = {
-          fullName: "Nguyễn Thị Mai",
-          phone: phone.trim(),
-          email: "mai.nguyen@gmail.com",
-          memberTier: "Gold",
-          rewardPoints: 1250,
-        };
-        localStorage.setItem("user", JSON.stringify(demoUser));
-        window.dispatchEvent(new Event("user-auth-change"));
-        setUser(demoUser);
-        setIsSubmitting(false);
-        return;
-      }
-
-      const loggedInUser: UserSession = {
-        ...result.user,
-        email: result.user.email || "mai.nguyen@gmail.com",
-        memberTier: result.user.memberTier || "Gold",
-        rewardPoints: result.user.rewardPoints || 1250,
-      };
-
-      localStorage.setItem("user", JSON.stringify(loggedInUser));
-      window.dispatchEvent(new Event("user-auth-change"));
-      setUser(loggedInUser);
-    } catch (err) {
-      // Fallback demo login on network error
-      const demoUser: UserSession = {
-        fullName: "Nguyễn Thị Mai",
-        phone: phone.trim(),
-        email: "mai.nguyen@gmail.com",
-        memberTier: "Gold",
-        rewardPoints: 1250,
-      };
-      localStorage.setItem("user", JSON.stringify(demoUser));
-      window.dispatchEvent(new Event("user-auth-change"));
-      setUser(demoUser);
-    } finally {
-      setIsSubmitting(false);
+      localStorage.setItem("concung_bank_account", JSON.stringify(bankData));
+      window.dispatchEvent(new Event("bank-account-changed"));
+      setLinkedBank(bankData);
+      setIsEditingBank(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 4000);
+    } catch {
+      setBankFormError("Không thể lưu tài khoản ngân hàng. Vui lòng thử lại.");
     }
   };
 
-  // Handle Logout
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
-    window.dispatchEvent(new Event("user-auth-change"));
+  // Unlink bank account
+  const handleUnlinkBank = () => {
+    if (confirm("Ba mẹ có chắc chắn muốn hủy liên kết tài khoản ngân hàng này?")) {
+      localStorage.removeItem("concung_bank_account");
+      window.dispatchEvent(new Event("bank-account-changed"));
+      setLinkedBank(null);
+      setAccountNumber("");
+      setAccountHolder("");
+      setIsEditingBank(true);
+    }
   };
 
-  const mockOrders = [
-    {
-      id: "ORD-2026-8891",
-      date: "02/09/2026",
-      total: 1084000,
-      status: "Đã giao hàng",
-      items: [
-        "Tã quần Moony Natural Size L 36 miếng (x2)",
-        "Sữa bột Friso Gold số 3 1400g (x1)",
-      ],
-    },
-    {
-      id: "ORD-2026-7720",
-      date: "15/08/2026",
-      total: 1250000,
-      status: "Đang vận chuyển",
-      items: ["Xe đẩy em bé hai chiều gấp gọn Baobaohao V8 (x1)"],
-    },
-  ];
-
-  if (isLoading) {
-    return (
-      <div className="max-w-container mx-auto px-4 py-12 text-center text-slate-500 text-sm">
-        Đang tải thông tin tài khoản...
+  return <div className={styles.page}><div className={styles.container}>
+    <h1>Tài khoản</h1>
+    {loading ? <p role="status" className={styles.message}>Đang tải thông tin tài khoản…</p> : guest ? <div className={styles.guest}><Shield size={42} /><h2>Chào mừng ba mẹ!</h2><p>Đăng nhập để xem thông tin tài khoản của mình.</p><Link href="/login">Đăng nhập</Link><Link href="/register">Đăng ký tài khoản</Link></div> : user && <>
+      <section className={styles.profile} aria-label="Hồ sơ tài khoản"><div className={styles.avatar}>{user.fullName.trim().slice(0,1).toLocaleUpperCase("vi-VN")}</div><h2>{user.fullName}</h2><span>Trạng thái chưa cập nhật</span></section>
+      <h3>Thông tin cá nhân</h3>
+      <div className={styles.list}>
+        <div className={styles.row}><span className={styles.pinkIcon}><Star size={20} /></span><div><label>ĐIỂM TÍN NHIỆM</label><strong className={styles.pink}>Chưa cập nhật</strong></div><span className={styles.track} aria-hidden="true" /></div>
+        <div className={styles.row}><span className={styles.icon}><Phone size={20} /></span><div><label>ĐIỆN THOẠI</label><strong>{user.phone}</strong></div></div>
+        <div className={styles.row}><span className={styles.icon}><CalendarDays size={20} /></span><div><label>NGÀY THAM GIA</label><strong>{user.createdAt ? new Date(user.createdAt).toLocaleDateString("vi-VN", { day:"2-digit", month:"2-digit", year:"numeric", timeZone:"Asia/Ho_Chi_Minh" }) : "Chưa cập nhật"}</strong></div></div>
       </div>
-    );
-  }
 
-  // ==========================================
-  // GUEST STATE: Render Login Form directly
-  // ==========================================
-  if (!user) {
-    return (
-      <div className="min-h-[75vh] flex items-center justify-center px-4 py-8 bg-gradient-to-b from-pink-50/50 to-white">
-        <div className="w-full max-w-[420px] bg-white rounded-[28px] p-6 sm:p-9 shadow-xl border border-pink-100/60 space-y-6">
-          {/* Header & Title */}
-          <div className="space-y-1.5">
-            <h2 className="text-xl sm:text-[22px] font-extrabold text-slate-900 tracking-tight">
-              Vui chào đón ba mẹ,
-            </h2>
-            <p className="text-xs sm:text-[13px] text-slate-500">
-              Đăng nhập hoặc{" "}
-              <Link href="/register" className="font-bold text-[#F72585] hover:underline">
-                Đăng ký ngay tài khoản
-              </Link>
-            </p>
-          </div>
-
-          {/* Form Error Alert */}
-          {formError && (
-            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-bold">
-              ⚠️ {formError}
-            </div>
-          )}
-
-          {/* Login Form */}
-          <form onSubmit={handleLoginSubmit} className="space-y-4">
-            {/* Input Phone */}
-            <div className="space-y-1">
-              <Input
-                label="Số điện thoại *"
-                placeholder="Ba mẹ nhập vào số điện thoại"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                leftIcon={<Phone className="h-4 w-4 text-slate-400" />}
-                className="h-12 bg-slate-50/80 border-slate-200 focus:bg-white rounded-xl text-sm"
-              />
-            </div>
-
-            {/* Input Password */}
-            <div className="space-y-1">
-              <div className="relative">
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  label="Mật khẩu *"
-                  placeholder="Ba mẹ nhập mật khẩu"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  leftIcon={<Lock className="h-4 w-4 text-slate-400" />}
-                  className="h-12 bg-slate-50/80 border-slate-200 focus:bg-white rounded-xl text-sm pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-[38px] text-slate-400 hover:text-slate-600 focus:outline-none"
-                  aria-label="Toggle password visibility"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full h-12 rounded-xl bg-[#F72585] hover:bg-rose-600 text-white font-bold text-base shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-75 cursor-pointer mt-2"
-            >
-              <span>{isSubmitting ? "Đang xử lý..." : "Đăng Nhập"}</span>
-              <ArrowRight className="w-5 h-5 stroke-[2.5]" />
-            </button>
-          </form>
-
-          {/* Terms & Privacy Notice */}
-          <div className="pt-2">
-            <label
-              onClick={() => setAgreed(!agreed)}
-              className="flex items-start gap-2 cursor-pointer text-[11px] text-slate-600 leading-relaxed select-none"
-            >
-              <div className="mt-0.5 shrink-0 text-[#F72585]">
-                <CheckSquare
-                  className={`w-4 h-4 ${agreed ? "fill-[#F72585] text-white" : "text-slate-300"}`}
-                />
-              </div>
-              <span>
-                Ba mẹ đã đọc và đồng ý với{" "}
-                <a href="#" className="font-bold text-[#F72585] hover:underline">
-                  Điều Khoản Chung
-                </a>{" "}
-                &{" "}
-                <a href="#" className="font-bold text-[#F72585] hover:underline">
-                  Chính Sách Bảo Mật
-                </a>{" "}
-                của ConCung
-              </span>
-            </label>
-          </div>
+      {/* Bank Account linkage row */}
+      <button className={`${styles.row} ${styles.bank}`} onClick={() => dialog.current?.showModal()}>
+        <span className={styles.blueIcon}><Landmark size={20} /></span>
+        <div>
+          <strong>Tài khoản ngân hàng</strong>
+          <small>
+            {linkedBank
+              ? `${linkedBank.bankName.split(" ")[0]} • ****${linkedBank.accountNumber.slice(-4)} (${linkedBank.accountHolder})`
+              : "Quản lý liên kết ngân hàng"}
+          </small>
         </div>
-      </div>
-    );
-  }
+        <ChevronRight size={18} />
+      </button>
 
-  // ==========================================
-  // LOGGED-IN STATE: Render Account Dashboard
-  // ==========================================
-  return (
-    <div className="max-w-container mx-auto px-4 py-6 space-y-6">
-      <h1 className="text-xl sm:text-2xl font-black text-slate-900">Quản Lý Tài Khoản</h1>
+      <h3>Hạng thành viên</h3><section className={styles.tier}><div className={styles.level}>—</div><div><label>HẠNG HIỆN TẠI</label><strong>Chưa cập nhật</strong><small>Thông tin hạng thành viên chưa được thiết lập</small></div><Shield className={styles.shield} size={88} /></section>
+      <button className={styles.logout} onClick={logout} disabled={loggingOut}><LogOut size={20} />{loggingOut ? "Đang đăng xuất…" : "Đăng xuất"}</button>
+    </>}
+    {error && <div role="alert" className={styles.message}><p>{error}</p><button onClick={load}>Thử lại</button></div>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar Nav */}
-        <aside className="space-y-4">
-          <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-subtle space-y-4 text-center">
-            <div className="h-16 w-16 bg-rose-50 text-[#F72585] rounded-full flex items-center justify-center font-black text-xl mx-auto border-2 border-rose-200">
-              {(user.fullName || "M").charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-900 text-base">{user.fullName || "Tài khoản Con Cưng"}</h3>
-              <p className="text-xs text-slate-500">{user.phone}</p>
-            </div>
-
-            <div className="bg-amber-50 rounded-xl p-3 border border-amber-100 space-y-1">
-              <div className="flex items-center justify-center gap-1.5 text-amber-700 font-bold text-xs">
-                <Award className="h-4 w-4" />
-                <span>Hạng Thành Viên: {user.memberTier || "Gold"}</span>
-              </div>
-              <p className="text-[11px] text-amber-600">
-                Tích điểm: <strong>{user.rewardPoints || 1250} đ</strong>
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-slate-100 bg-white p-2 shadow-subtle space-y-1">
-            <button
-              onClick={() => setActiveTab("orders")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-colors ${
-                activeTab === "orders"
-                  ? "bg-rose-50 text-[#F72585] border border-rose-100"
-                  : "text-slate-700 hover:bg-slate-50"
-              }`}
-            >
-              <Package className="h-4 w-4" />
-              <span>Đơn hàng của tôi</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("profile")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-colors ${
-                activeTab === "profile"
-                  ? "bg-rose-50 text-[#F72585] border border-rose-100"
-                  : "text-slate-700 hover:bg-slate-50"
-              }`}
-            >
-              <User className="h-4 w-4" />
-              <span>Thông tin cá nhân</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("addresses")}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-colors ${
-                activeTab === "addresses"
-                  ? "bg-rose-50 text-[#F72585] border border-rose-100"
-                  : "text-slate-700 hover:bg-slate-50"
-              }`}
-            >
-              <MapPin className="h-4 w-4" />
-              <span>Sổ địa chỉ nhận hàng</span>
-            </button>
-
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition-colors"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Đăng xuất</span>
-            </button>
-          </div>
-        </aside>
-
-        {/* Content Area */}
-        <div className="lg:col-span-3">
-          {activeTab === "orders" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Đơn Hàng Đã Đặt</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {mockOrders.map((order) => (
-                  <div
-                    key={order.id}
-                    className="rounded-xl border border-slate-100 p-4 space-y-3 bg-slate-50/50"
-                  >
-                    <div className="flex items-center justify-between text-xs border-b border-slate-100 pb-2">
-                      <span className="font-bold text-slate-800">{order.id} • {order.date}</span>
-                      <Badge variant={order.status === "Đã giao hàng" ? "official" : "warning"}>
-                        {order.status}
-                      </Badge>
-                    </div>
-
-                    <div className="space-y-1 text-xs text-slate-700">
-                      {order.items.map((item, idx) => (
-                        <p key={idx}>• {item}</p>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-                      <span className="text-slate-500">Tổng giá trị:</span>
-                      <span className="font-extrabold text-price text-sm">{formatVND(order.total)}</span>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          )}
-
-          {activeTab === "profile" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Thông Tin Cá Nhân</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-xs">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="font-semibold text-slate-500">Họ và tên:</label>
-                    <p className="font-bold text-slate-900 text-sm">{user.fullName || "Nguyễn Thị Mai"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="font-semibold text-slate-500">Số điện thoại:</label>
-                    <p className="font-bold text-slate-900 text-sm">{user.phone}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="font-semibold text-slate-500">Email:</label>
-                    <p className="font-bold text-slate-900 text-sm">{user.email || "mai.nguyen@gmail.com"}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="font-semibold text-slate-500">Thành viên:</label>
-                    <p className="font-bold text-[#F72585] text-sm">{user.memberTier || "Gold"} VIP</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {activeTab === "addresses" && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Sổ Địa Chỉ</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-xs">
-                <div className="rounded-xl border border-rose-200 bg-rose-50/30 p-4 space-y-2 relative">
-                  <div className="flex items-center gap-2 font-bold text-slate-900 text-sm">
-                    <span>{user.fullName || "Nguyễn Thị Mai"}</span>
-                    <span className="text-slate-400">•</span>
-                    <span>{user.phone}</span>
-                    <Badge variant="brand">Mặc định</Badge>
-                  </div>
-                  <p className="text-slate-600">
-                    245 Cầu Giấy, Phường Dịch Vọng, Quận Cầu Giấy, Hà Nội
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+    {/* Bank Account Modal Dialog */}
+    <dialog ref={dialog} className={styles.dialog} aria-labelledby="bank-title">
+      <div className={styles.dialogHeader}>
+        <div className={styles.dialogHeaderTitle}>
+          <Landmark size={24} />
+          <span id="bank-title">Tài khoản ngân hàng</span>
         </div>
+        <button className={styles.close} onClick={() => dialog.current?.close()} aria-label="Đóng">
+          <X size={18} />
+        </button>
       </div>
-    </div>
-  );
+
+      {saveSuccess && (
+        <div className={styles.successAlert}>
+          ✓ Đã lưu thông tin tài khoản ngân hàng thành công! Thông tin sẽ được tự động sử dụng cho các lần rút tiền sau.
+        </div>
+      )}
+
+      {/* Case 1: Bank already linked and not editing */}
+      {linkedBank && !isEditingBank ? (
+        <div className="space-y-4">
+          <div className={styles.bankCard}>
+            <div className={styles.bankCardTop}>
+              <span className={styles.bankCardName}>{linkedBank.bankName}</span>
+              <span className={styles.bankCardBadge}>✓ Đã liên kết</span>
+            </div>
+            <div className={styles.bankCardNumber}>
+              {linkedBank.accountNumber.replace(/(\d{4})/g, "$1 ").trim()}
+            </div>
+            <div className={styles.bankCardHolder}>
+              CHỦ TK: {linkedBank.accountHolder}
+            </div>
+          </div>
+
+          <p className={styles.noteText}>
+            Tài khoản này được dùng để rút tiền từ Ví Con Cưng. Thông tin được lưu bảo mật và cố định cho các lần rút sau.
+          </p>
+
+          <button className={styles.saveBtn} onClick={() => setIsEditingBank(true)}>
+            <Edit3 size={16} className="inline mr-1" /> Cập nhật tài khoản khác
+          </button>
+          <button className={styles.unlinkBtn} onClick={handleUnlinkBank}>
+            <Trash2 size={16} className="inline mr-1" /> Hủy liên kết tài khoản
+          </button>
+        </div>
+      ) : (
+        /* Case 2: Form to Link or Update Bank Account */
+        <form onSubmit={handleSaveBank} className={styles.bankForm}>
+          {bankFormError && (
+            <div className="text-xs text-red-600 font-bold bg-red-50 p-2.5 rounded-lg border border-red-200">
+              ⚠️ {bankFormError}
+            </div>
+          )}
+
+          <div className={styles.formGroup}>
+            <label htmlFor="select-bank">Chọn Ngân hàng *</label>
+            <select
+              id="select-bank"
+              value={selectedBank}
+              onChange={(e) => setSelectedBank(e.target.value)}
+            >
+              {POPULAR_BANKS.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="input-acc-num">Số tài khoản ngân hàng *</label>
+            <input
+              id="input-acc-num"
+              type="text"
+              inputMode="numeric"
+              placeholder="Ví dụ: 1903668899"
+              value={accountNumber}
+              onChange={(e) => setAccountNumber(e.target.value.replace(/[^0-9]/g, ""))}
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="input-acc-holder">Họ và tên chủ tài khoản *</label>
+            <input
+              id="input-acc-holder"
+              type="text"
+              placeholder="Ví dụ: NGUYEN THI MAI"
+              value={accountHolder}
+              onChange={(e) => setAccountHolder(e.target.value.toUpperCase())}
+            />
+          </div>
+
+          <p className={styles.noteText}>
+            Lưu ý: Tên chủ tài khoản phải viết hoa không dấu và khớp với tên trên thẻ ngân hàng của bạn. Thông tin được lưu cố định cho các lần rút tiền sau.
+          </p>
+
+          <button type="submit" className={styles.saveBtn}>
+            <CheckCircle2 size={18} className="inline mr-1.5" />
+            Lưu tài khoản ngân hàng
+          </button>
+
+          {linkedBank && (
+            <button
+              type="button"
+              className={styles.unlinkBtn}
+              onClick={() => setIsEditingBank(false)}
+            >
+              Quay lại
+            </button>
+          )}
+        </form>
+      )}
+    </dialog>
+  </div></div>;
 }

@@ -1,3 +1,4 @@
+import { attachSession } from "@/lib/session";
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
 
     const newUser = result[0];
 
-    return NextResponse.json({
+    return attachSession(NextResponse.json({
       success: true,
       message: "Đăng ký tài khoản thành công!",
       user: {
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
         fullName: newUser.full_name,
         phone: newUser.phone,
       },
-    });
+    }), newUser.id);
   } catch (error: any) {
     console.error("Error registering user:", error);
     return NextResponse.json(

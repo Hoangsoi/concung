@@ -1,3 +1,4 @@
+import { attachSession } from "@/lib/session";
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({
+    return attachSession(NextResponse.json({
       success: true,
       message: "Đăng nhập thành công!",
       user: {
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
         fullName: user.full_name,
         phone: user.phone,
       },
-    });
+    }), user.id);
   } catch (error: any) {
     console.error("Error logging in user:", error);
     return NextResponse.json(
