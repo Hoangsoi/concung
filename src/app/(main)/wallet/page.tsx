@@ -43,29 +43,21 @@ export default function WalletPage() {
 
   const dialog = useRef<HTMLDialogElement>(null);
 
-  // Load wallet data from localStorage per user
-  const loadWalletData = () => {
+  // Load wallet data from Neon DB API
+  const loadWalletData = async () => {
     try {
-      const savedUserStr = localStorage.getItem("user");
-      const phone = savedUserStr ? JSON.parse(savedUserStr)?.phone : null;
-      const key = phone ? `concung_wallet_data_${phone}` : "concung_wallet_data";
-      const savedWallet = localStorage.getItem(key);
-      if (savedWallet) {
-        const parsed = JSON.parse(savedWallet);
-        setBalance(parsed.balance ?? 0);
-        setTotalDeposit(parsed.totalDeposit ?? 0);
-        setTotalWithdraw(parsed.totalWithdraw ?? 0);
-        setPendingDeposit(parsed.pendingDeposit ?? 0);
-        setTxCount(parsed.txCount ?? 0);
-      } else {
-        setBalance(0);
-        setTotalDeposit(0);
-        setTotalWithdraw(0);
-        setPendingDeposit(0);
-        setTxCount(0);
+      const res = await fetch("/api/wallet", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        setBalance(data.balance ?? 0);
+        setTotalDeposit(data.totalDeposit ?? 0);
+        setTotalWithdraw(data.totalWithdraw ?? 0);
+        setPendingDeposit(data.pendingDeposit ?? 0);
+        setTxCount(data.txCount ?? 0);
+        return;
       }
-    } catch {
-      setBalance(0);
+    } catch (err) {
+      console.warn("Failed to fetch wallet data from API:", err);
     }
   };
 
@@ -87,7 +79,7 @@ export default function WalletPage() {
   };
 
   useEffect(() => {
-    loadWalletData();
+    void loadWalletData();
     void loadLinkedBank();
 
     window.addEventListener("bank-account-changed", loadLinkedBank);
@@ -112,47 +104,41 @@ export default function WalletPage() {
   const isBalanceInsufficient = isWithdraw && numAmount > balance;
   const canSubmit = isValidAmount && !isBalanceInsufficient && (!isWithdraw || Boolean(linkedBank));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit || isSubmitting) return;
 
     setIsSubmitting(true);
-
-    setTimeout(() => {
-      setIsSubmitting(false);
-
-      if (isWithdraw && linkedBank) {
-        const newBalance = Math.max(0, balance - numAmount);
-        const newWithdraw = totalWithdraw + numAmount;
-        const newTxCount = txCount + 1;
-
-        setBalance(newBalance);
-        setTotalWithdraw(newWithdraw);
-        setTxCount(newTxCount);
-
-        // Save wallet state per user
-        const savedUserStr = localStorage.getItem("user");
-        const phone = savedUserStr ? JSON.parse(savedUserStr)?.phone : null;
-        const key = phone ? `concung_wallet_data_${phone}` : "concung_wallet_data";
-        localStorage.setItem(
-          key,
-          JSON.stringify({
-            balance: newBalance,
-            totalDeposit,
-            totalWithdraw: newWithdraw,
-            pendingDeposit,
-            txCount: newTxCount,
-          })
-        );
-
-        setWithdrawSuccess({
+    try {
+      const res = await fetch("/api/wallet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "withdraw",
           amount: numAmount,
-          bank: linkedBank.bankName,
-          acc: linkedBank.accountNumber,
-          remainingBalance: newBalance,
-        });
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setBalance(data.remainingBalance);
+        if (linkedBank) {
+          setWithdrawSuccess({
+            amount: numAmount,
+            bank: linkedBank.bankName,
+            acc: linkedBank.accountNumber,
+            remainingBalance: data.remainingBalance,
+          });
+        }
+        void loadWalletData();
+      } else {
+        alert(data.error || "Rút tiền thất bại");
       }
-    }, 600);
+    } catch {
+      alert("Lỗi kết nối khi rút tiền");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
