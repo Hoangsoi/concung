@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Star, Phone, CalendarDays, Landmark, ChevronRight, Shield, LogOut, X, CheckCircle2, Edit3, Trash2 } from "lucide-react";
+import { Star, Phone, CalendarDays, Landmark, ChevronRight, Shield, LogOut, X, CheckCircle2, Edit3, Trash2, Award, Crown, Gem, Sparkles, Trophy, ShieldCheck } from "lucide-react";
 import styles from "./account.module.css";
 
 type Profile = {
@@ -39,6 +39,45 @@ const POPULAR_BANKS = [
   "MSB",
   "MoMo (Ví điện tử)",
 ];
+
+const getTierBadge = (tierName?: string) => {
+  const t = (tierName || "Thành Viên").trim().toLowerCase();
+  if (t.includes("kim cương")) {
+    return {
+      icon: <Sparkles size={28} className="text-purple-600 fill-purple-200" />,
+      bgStyle: { backgroundColor: "#f3e8ff", border: "1px solid #d8b4fe" },
+    };
+  }
+  if (t.includes("bạch kim")) {
+    return {
+      icon: <Gem size={28} className="text-sky-600 fill-sky-100" />,
+      bgStyle: { backgroundColor: "#e0f2fe", border: "1px solid #bae6fd" },
+    };
+  }
+  if (t.includes("vàng")) {
+    return {
+      icon: <Crown size={28} className="text-amber-500 fill-amber-300" />,
+      bgStyle: { backgroundColor: "#fef3c7", border: "1px solid #fde68a" },
+    };
+  }
+  if (t.includes("bạc")) {
+    return {
+      icon: <ShieldCheck size={28} className="text-slate-600 fill-slate-200" />,
+      bgStyle: { backgroundColor: "#e2e8f0", border: "1px solid #cbd5e1" },
+    };
+  }
+  if (t.includes("vip")) {
+    return {
+      icon: <Trophy size={28} className="text-rose-600 fill-rose-200" />,
+      bgStyle: { backgroundColor: "#ffe4e6", border: "1px solid #fecdd3" },
+    };
+  }
+  // Default: Thành Viên
+  return {
+    icon: <Award size={28} className="text-stone-600 fill-stone-200" />,
+    bgStyle: { backgroundColor: "#e7e5e4", border: "1px solid #d6d3d1" },
+  };
+};
 
 export default function AccountPage() {
   const [user, setUser] = useState<Profile | null>(null);
@@ -296,9 +335,14 @@ export default function AccountPage() {
 
       <h3>Hạng thành viên</h3>
       <section className={styles.tier}>
-        <div className={styles.level}>
-          {user.tier ? user.tier.slice(0, 2).toUpperCase() : "TV"}
-        </div>
+        {(() => {
+          const badge = getTierBadge(user.tier);
+          return (
+            <div className={styles.level} style={badge.bgStyle}>
+              {badge.icon}
+            </div>
+          );
+        })()}
         <div>
           <label>HẠNG HIỆN TẠI</label>
           <strong className="text-[#f52885] text-lg font-bold block">{user.tier || "Thành Viên"}</strong>
