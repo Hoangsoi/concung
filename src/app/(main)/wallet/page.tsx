@@ -48,9 +48,9 @@ export default function WalletPage() {
     dialog.current?.showModal();
   }
 
-  // Calculate validity
+  // Calculate validity (no upper limit)
   const numAmount = Number(amount);
-  const isValidAmount = numAmount >= 10000 && numAmount <= 10000000;
+  const isValidAmount = numAmount > 0;
   const isWithdraw = mode === "withdraw";
   const canSubmit = isValidAmount && (!isWithdraw || Boolean(linkedBank));
 
@@ -169,7 +169,7 @@ export default function WalletPage() {
                   <span>đ</span>
                 </div>
 
-                <small id="amount-hint">Từ 10.000đ đến 10.000.000đ / giao dịch</small>
+                <small id="amount-hint">Không giới hạn số tiền giao dịch</small>
 
                 <div className={styles.presets}>
                   {[50000, 100000, 200000, 500000].map((value) => (
