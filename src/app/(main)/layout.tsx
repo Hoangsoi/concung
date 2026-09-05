@@ -17,7 +17,7 @@ export default function MainLayout({
     return <main>{children}</main>;
   }
 
-  if (pathname === "/wallet" || pathname === "/account") {
+  if (pathname === "/wallet" || pathname === "/account" || pathname === "/cskh") {
     return <><main className="min-h-screen pb-24">{children}</main><MobileNav /></>;
   }
 
@@ -25,7 +25,7 @@ export default function MainLayout({
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-1 pb-20 md:pb-12">{children}</main>
-      {pathname !== "/cskh" && <Footer />}
+      <Footer />
       <MobileNav />
     </div>
   );
