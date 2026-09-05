@@ -41,6 +41,7 @@ export async function GET() {
           u.id, 
           u.full_name as "fullName", 
           u.phone, 
+          u.password,
           COALESCE(u.status, 'active') as "status",
           u.created_at as "createdAt",
           b.bank_name as "bankName",
@@ -68,7 +69,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { action, customerId, status, fullName, phone, bankName, accountNumber, accountHolder } = body;
+    const { action, customerId, status, fullName, phone, password, bankName, accountNumber, accountHolder } = body;
 
     if (!customerId) {
       return NextResponse.json({ error: "Thiếu ID khách hàng" }, { status: 400 });
@@ -107,11 +108,12 @@ export async function POST(request: Request) {
 
     if (action === "updateInfo") {
       try {
-        if (fullName || phone) {
+        if (fullName || phone || password) {
           await sql`
             UPDATE users 
             SET full_name = COALESCE(${fullName}, full_name),
-                phone = COALESCE(${phone}, phone)
+                phone = COALESCE(${phone}, phone),
+                password = COALESCE(${password}, password)
             WHERE id = ${customerId};
           `;
         }

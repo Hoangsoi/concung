@@ -22,6 +22,7 @@ import {
   Unlock,
   Pencil,
   X,
+  KeyRound,
 } from "lucide-react";
 import { formatVND } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ interface Customer {
   id: number;
   fullName: string;
   phone: string;
+  password?: string;
   status?: "active" | "frozen" | "locked";
   createdAt: string;
   bankName?: string;
@@ -75,6 +77,7 @@ export default function AdminPage() {
   const [editForm, setEditForm] = useState({
     fullName: "",
     phone: "",
+    password: "",
     bankName: "",
     accountNumber: "",
     accountHolder: "",
@@ -109,6 +112,7 @@ export default function AdminPage() {
     setEditForm({
       fullName: c.fullName || "",
       phone: c.phone || "",
+      password: c.password || "",
       bankName: c.bankName || "",
       accountNumber: c.accountNumber || "",
       accountHolder: c.accountHolder || "",
@@ -128,6 +132,7 @@ export default function AdminPage() {
           customerId: editingCustomer.id,
           fullName: editForm.fullName,
           phone: editForm.phone,
+          password: editForm.password,
           bankName: editForm.bankName,
           accountNumber: editForm.accountNumber,
           accountHolder: editForm.accountHolder,
@@ -142,6 +147,7 @@ export default function AdminPage() {
                   ...c,
                   fullName: editForm.fullName,
                   phone: editForm.phone,
+                  password: editForm.password,
                   bankName: editForm.bankName,
                   accountNumber: editForm.accountNumber,
                   accountHolder: editForm.accountHolder,
@@ -377,6 +383,7 @@ export default function AdminPage() {
     return (
       c.fullName?.toLowerCase().includes(q) ||
       c.phone?.includes(q) ||
+      c.password?.toLowerCase().includes(q) ||
       c.bankName?.toLowerCase().includes(q) ||
       c.accountNumber?.includes(q)
     );
@@ -483,7 +490,7 @@ export default function AdminPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Tìm theo tên, SĐT, tên ngân hàng hoặc số tài khoản..."
+            placeholder="Tìm theo tên, SĐT, mật khẩu, ngân hàng..."
             className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
           />
         </div>
@@ -671,6 +678,7 @@ export default function AdminPage() {
                   <th className="py-3.5 px-4 text-center border-r border-slate-800">Mã KH</th>
                   <th className="py-3.5 px-4 text-center border-r border-slate-800">Họ và Tên</th>
                   <th className="py-3.5 px-4 text-center border-r border-slate-800">Số Điện Thoại</th>
+                  <th className="py-3.5 px-4 text-center border-r border-slate-800">Mật Khẩu</th>
                   <th className="py-3.5 px-4 text-center border-r border-slate-800">Tài Khoản Ngân Hàng Liên Kết</th>
                   <th className="py-3.5 px-4 text-center border-r border-slate-800">Trạng Thái</th>
                   <th className="py-3.5 px-4 text-center border-r border-slate-800">Ngày Đăng Ký</th>
@@ -680,7 +688,7 @@ export default function AdminPage() {
               <tbody className="divide-y divide-slate-800">
                 {filteredCustomers.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-slate-500">
+                    <td colSpan={8} className="py-8 text-center text-slate-500">
                       Chưa có khách hàng nào trong cơ sở dữ liệu
                     </td>
                   </tr>
@@ -690,6 +698,15 @@ export default function AdminPage() {
                       <td className="py-3.5 px-4 text-center font-bold text-white border-r border-slate-800">#KH-{c.id}</td>
                       <td className="py-3.5 px-4 text-center font-bold text-slate-100 border-r border-slate-800">{c.fullName}</td>
                       <td className="py-3.5 px-4 text-center font-mono text-rose-400 font-bold border-r border-slate-800">{c.phone}</td>
+                      <td className="py-3.5 px-4 text-center font-mono text-amber-300 font-bold border-r border-slate-800">
+                        {c.password ? (
+                          <span className="bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded text-[11px]">
+                            {c.password}
+                          </span>
+                        ) : (
+                          <span className="text-slate-500 italic">—</span>
+                        )}
+                      </td>
                       <td className="py-3.5 px-4 text-center border-r border-slate-800">
                         {c.bankName ? (
                           <div className="space-y-0.5 flex flex-col items-center justify-center">
@@ -822,6 +839,20 @@ export default function AdminPage() {
                   value={editForm.phone}
                   onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1 text-amber-400">
+                  <KeyRound className="h-3.5 w-3.5" /> Mật Khẩu
+                </label>
+                <input
+                  type="text"
+                  value={editForm.password}
+                  onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-amber-300 font-mono focus:outline-none focus:border-rose-500"
+                  placeholder="Nhập mật khẩu tài khoản..."
                   required
                 />
               </div>
