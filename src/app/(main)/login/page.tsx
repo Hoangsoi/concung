@@ -142,7 +142,6 @@ export default function LoginPage() {
             </form>
 
         <p className={styles.switchLink}>Chưa có tài khoản? <Link href="/register">Đăng ký ngay</Link></p>
-        <Link href="/admin" className={styles.admin}>Cổng quản trị</Link>
       </div>
     </div>
   );
