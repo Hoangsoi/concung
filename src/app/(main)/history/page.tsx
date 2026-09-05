@@ -6,10 +6,11 @@ import { History, Package, RotateCcw, ChevronRight, Clock, ShoppingBag, CheckCir
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { WalletHistory } from "@/components/wallet/WalletHistory";
 import { formatVND } from "@/lib/utils";
 
 export default function HistoryPage() {
-  const [activeTab, setActiveTab] = useState<"orders" | "viewed">("orders");
+  const [activeTab, setActiveTab] = useState<"wallet" | "orders" | "viewed">("wallet");
 
   const mockOrders = [
     {
@@ -87,13 +88,15 @@ export default function HistoryPage() {
           <History className="h-5 w-5" />
         </div>
         <div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900">Lịch Sử Mua Hàng & Xem Sản Phẩm</h1>
-          <p className="text-xs text-slate-500">Theo dõi các đơn hàng và sản phẩm bạn đã xem gần đây</p>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900">Lịch sử giao dịch</h1>
+          <p className="text-xs text-slate-500">Theo dõi nạp/rút, đơn hàng và sản phẩm đã xem</p>
         </div>
       </div>
 
+
       {/* Tabs selector */}
-      <div className="flex border-b border-slate-200 gap-6 text-sm font-bold">
+      <div className="flex flex-wrap border-b border-slate-200 gap-4 text-xs sm:text-sm font-bold">
+        <button onClick={() => setActiveTab("wallet")} aria-pressed={activeTab === "wallet"} className={`pb-3 border-b-2 ${activeTab === "wallet" ? "border-pink-500 text-pink-500" : "border-transparent text-slate-500"}`}>Nạp / Rút</button>
         <button
           onClick={() => setActiveTab("orders")}
           className={`pb-3 flex items-center gap-2 transition-colors relative ${
@@ -101,7 +104,7 @@ export default function HistoryPage() {
           }`}
         >
           <Package className="h-4 w-4" />
-          <span>Lịch sử đơn hàng ({mockOrders.length})</span>
+          <span>Đơn hàng</span>
           {activeTab === "orders" && (
             <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#F52862] rounded-full" />
           )}
@@ -114,13 +117,14 @@ export default function HistoryPage() {
           }`}
         >
           <Clock className="h-4 w-4" />
-          <span>Sản phẩm đã xem ({mockViewedProducts.length})</span>
+          <span>Đã xem</span>
           {activeTab === "viewed" && (
             <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#F52862] rounded-full" />
           )}
         </button>
       </div>
 
+      {activeTab === "wallet" && <WalletHistory />}
       {/* Orders List */}
       {activeTab === "orders" && (
         <div className="space-y-4">
