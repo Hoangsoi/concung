@@ -49,7 +49,7 @@ export function TopBar() {
     <div className={styles.bar}>
       <div className={styles.container}>
         <Link href="/cskh" className={styles.hotline}>
-          <span className="font-bold text-[#ff379b] hover:underline cursor-pointer">
+          <span className="font-bold text-slate-900 hover:text-[#ff379b] hover:underline cursor-pointer">
             Liên hệ CSKH
           </span>
         </Link>
