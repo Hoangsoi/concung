@@ -61,8 +61,26 @@ export default function AccountPage() {
     finally { setLoading(false); }
   }
 
-  // Load saved bank account from localStorage
-  const loadSavedBank = () => {
+  // Load saved bank account from Neon DB and fallback to localStorage
+  const loadSavedBank = async () => {
+    try {
+      const res = await fetch("/api/account/bank", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.bank) {
+          setLinkedBank(data.bank);
+          setSelectedBank(data.bank.bankName || POPULAR_BANKS[0]);
+          setAccountNumber(data.bank.accountNumber || "");
+          setAccountHolder(data.bank.accountHolder || "");
+          localStorage.setItem("concung_bank_account", JSON.stringify(data.bank));
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to fetch bank from API, checking localStorage:", err);
+    }
+
+    // Fallback to localStorage
     try {
       const saved = localStorage.getItem("concung_bank_account");
       if (saved) {
@@ -81,7 +99,7 @@ export default function AccountPage() {
 
   useEffect(() => {
     void load();
-    loadSavedBank();
+    void loadSavedBank();
 
     window.addEventListener("bank-account-changed", loadSavedBank);
     return () => {
@@ -99,8 +117,8 @@ export default function AccountPage() {
     } catch { setError("Chưa đăng xuất được. Vui lòng thử lại."); setLoggingOut(false); }
   }
 
-  // Save bank account permanently
-  const handleSaveBank = (e: React.FormEvent) => {
+  // Save bank account permanently to Neon DB & localStorage
+  const handleSaveBank = async (e: React.FormEvent) => {
     e.preventDefault();
     setBankFormError("");
     setSaveSuccess(false);
@@ -121,16 +139,31 @@ export default function AccountPage() {
       linkedAt: new Date().toLocaleDateString("vi-VN"),
     };
 
+    // Save to localStorage immediately
+    localStorage.setItem("concung_bank_account", JSON.stringify(bankData));
+    setLinkedBank(bankData);
+
     try {
-      localStorage.setItem("concung_bank_account", JSON.stringify(bankData));
-      window.dispatchEvent(new Event("bank-account-changed"));
-      setLinkedBank(bankData);
-      setIsEditingBank(false);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 4000);
-    } catch {
-      setBankFormError("Không thể lưu tài khoản ngân hàng. Vui lòng thử lại.");
+      const res = await fetch("/api/account/bank", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bankData),
+      });
+      if (res.ok) {
+        const result = await res.json();
+        if (result.bank) {
+          setLinkedBank(result.bank);
+          localStorage.setItem("concung_bank_account", JSON.stringify(result.bank));
+        }
+      }
+    } catch (err) {
+      console.warn("API save bank warning, saved locally:", err);
     }
+
+    window.dispatchEvent(new Event("bank-account-changed"));
+    setIsEditingBank(false);
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 4000);
   };
 
   // Unlink bank account

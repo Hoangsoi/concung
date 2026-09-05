@@ -18,7 +18,21 @@ export default function WalletPage() {
   const [withdrawSuccess, setWithdrawSuccess] = useState<{ amount: number; bank: string; acc: string } | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
 
-  const loadLinkedBank = () => {
+  const loadLinkedBank = async () => {
+    try {
+      const res = await fetch("/api/account/bank", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.bank) {
+          setLinkedBank(data.bank);
+          localStorage.setItem("concung_bank_account", JSON.stringify(data.bank));
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to fetch bank from API in Wallet, checking localStorage:", err);
+    }
+
     try {
       const saved = localStorage.getItem("concung_bank_account");
       if (saved) {
@@ -32,7 +46,7 @@ export default function WalletPage() {
   };
 
   useEffect(() => {
-    loadLinkedBank();
+    void loadLinkedBank();
     window.addEventListener("bank-account-changed", loadLinkedBank);
     window.addEventListener("storage", loadLinkedBank);
     return () => {
