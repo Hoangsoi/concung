@@ -21,7 +21,10 @@ async function ensureBankTable() {
 
 export async function GET() {
   try {
-    const userId = sessionUserId() || 888; // Default session fallback ID
+    const userId = sessionUserId();
+    if (!userId) {
+      return NextResponse.json({ bank: null, error: "Chưa đăng nhập" }, { status: 401 });
+    }
 
     try {
       await ensureBankTable();
@@ -58,6 +61,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const userId = sessionUserId();
+    if (!userId) {
+      return NextResponse.json({ error: "Vui lòng đăng nhập để thực hiện" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { bankName, accountNumber, accountHolder } = body;
 
@@ -67,8 +75,6 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-
-    const userId = sessionUserId() || 888; // Session fallback ID
 
     try {
       await ensureBankTable();
@@ -98,21 +104,13 @@ export async function POST(request: Request) {
         });
       }
     } catch (dbErr) {
-      console.warn("Neon DB error saving bank account, using fallback response:", dbErr);
+      console.warn("Neon DB error saving bank account:", dbErr);
     }
 
-    // Fallback response if Neon DB is temporarily disconnected
-    const fallbackBank = {
-      bankName: bankName.trim(),
-      accountNumber: accountNumber.trim(),
-      accountHolder: accountHolder.trim().toUpperCase(),
-      linkedAt: new Date().toLocaleDateString("vi-VN"),
-    };
-
-    return NextResponse.json({
-      success: true,
-      bank: fallbackBank,
-    });
+    return NextResponse.json(
+      { error: "Không thể lưu thông tin ngân hàng. Vui lòng thử lại sau." },
+      { status: 500 }
+    );
   } catch (error) {
     console.error("Error saving bank account:", error);
     return NextResponse.json(

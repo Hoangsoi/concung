@@ -43,10 +43,13 @@ export default function WalletPage() {
 
   const dialog = useRef<HTMLDialogElement>(null);
 
-  // Load wallet data from localStorage
+  // Load wallet data from localStorage per user
   const loadWalletData = () => {
     try {
-      const savedWallet = localStorage.getItem("concung_wallet_data");
+      const savedUserStr = localStorage.getItem("user");
+      const phone = savedUserStr ? JSON.parse(savedUserStr)?.phone : null;
+      const key = phone ? `concung_wallet_data_${phone}` : "concung_wallet_data";
+      const savedWallet = localStorage.getItem(key);
       if (savedWallet) {
         const parsed = JSON.parse(savedWallet);
         setBalance(parsed.balance ?? 0);
@@ -54,9 +57,15 @@ export default function WalletPage() {
         setTotalWithdraw(parsed.totalWithdraw ?? 0);
         setPendingDeposit(parsed.pendingDeposit ?? 0);
         setTxCount(parsed.txCount ?? 0);
+      } else {
+        setBalance(0);
+        setTotalDeposit(0);
+        setTotalWithdraw(0);
+        setPendingDeposit(0);
+        setTxCount(0);
       }
     } catch {
-      // Default to 0
+      setBalance(0);
     }
   };
 
@@ -67,24 +76,14 @@ export default function WalletPage() {
         const data = await res.json();
         if (data.bank) {
           setLinkedBank(data.bank);
-          localStorage.setItem("concung_bank_account", JSON.stringify(data.bank));
           return;
         }
       }
     } catch (err) {
-      console.warn("Failed to fetch bank from API in Wallet, checking localStorage:", err);
+      console.warn("Failed to fetch bank from API in Wallet:", err);
     }
 
-    try {
-      const saved = localStorage.getItem("concung_bank_account");
-      if (saved) {
-        setLinkedBank(JSON.parse(saved));
-      } else {
-        setLinkedBank(null);
-      }
-    } catch {
-      setLinkedBank(null);
-    }
+    setLinkedBank(null);
   };
 
   useEffect(() => {
@@ -131,9 +130,12 @@ export default function WalletPage() {
         setTotalWithdraw(newWithdraw);
         setTxCount(newTxCount);
 
-        // Save wallet state
+        // Save wallet state per user
+        const savedUserStr = localStorage.getItem("user");
+        const phone = savedUserStr ? JSON.parse(savedUserStr)?.phone : null;
+        const key = phone ? `concung_wallet_data_${phone}` : "concung_wallet_data";
         localStorage.setItem(
-          "concung_wallet_data",
+          key,
           JSON.stringify({
             balance: newBalance,
             totalDeposit,

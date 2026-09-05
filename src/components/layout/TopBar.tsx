@@ -38,9 +38,16 @@ export function TopBar() {
     };
   }, []);
 
-  const handleLogout = (e: React.MouseEvent) => {
+  const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // Ignore
+    }
     localStorage.removeItem("user");
+    localStorage.removeItem("concung_bank_account");
+    localStorage.removeItem("concung_wallet_data");
     setUser(null);
     window.dispatchEvent(new Event("user-auth-change"));
   };

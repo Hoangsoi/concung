@@ -61,7 +61,7 @@ export default function AccountPage() {
     finally { setLoading(false); }
   }
 
-  // Load saved bank account from Neon DB and fallback to localStorage
+  // Load saved bank account from Neon DB
   const loadSavedBank = async () => {
     try {
       const res = await fetch("/api/account/bank", { cache: "no-store" });
@@ -72,29 +72,17 @@ export default function AccountPage() {
           setSelectedBank(data.bank.bankName || POPULAR_BANKS[0]);
           setAccountNumber(data.bank.accountNumber || "");
           setAccountHolder(data.bank.accountHolder || "");
-          localStorage.setItem("concung_bank_account", JSON.stringify(data.bank));
           return;
         }
       }
     } catch (err) {
-      console.warn("Failed to fetch bank from API, checking localStorage:", err);
+      console.warn("Failed to fetch bank from API:", err);
     }
 
-    // Fallback to localStorage
-    try {
-      const saved = localStorage.getItem("concung_bank_account");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setLinkedBank(parsed);
-        setSelectedBank(parsed.bankName || POPULAR_BANKS[0]);
-        setAccountNumber(parsed.accountNumber || "");
-        setAccountHolder(parsed.accountHolder || "");
-      } else {
-        setLinkedBank(null);
-      }
-    } catch {
-      setLinkedBank(null);
-    }
+    // Reset if no bank account is linked for this user
+    setLinkedBank(null);
+    setAccountNumber("");
+    setAccountHolder("");
   };
 
   useEffect(() => {
@@ -112,8 +100,14 @@ export default function AccountPage() {
     try {
       const response = await fetch("/api/auth/logout", { method: "POST" });
       if (!response.ok) throw new Error();
-      localStorage.removeItem("user"); window.dispatchEvent(new Event("user-auth-change"));
-      setUser(null); router.replace("/auth"); router.refresh();
+      localStorage.removeItem("user");
+      localStorage.removeItem("concung_bank_account");
+      localStorage.removeItem("concung_wallet_data");
+      window.dispatchEvent(new Event("user-auth-change"));
+      setUser(null);
+      setLinkedBank(null);
+      router.replace("/auth");
+      router.refresh();
     } catch { setError("Chưa đăng xuất được. Vui lòng thử lại."); setLoggingOut(false); }
   }
 
