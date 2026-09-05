@@ -122,46 +122,54 @@ export function WalletHistory() {
       ) : (
         <ul className={styles.transactions}>
           {filteredTxs.map((tx) => (
-            <li key={tx.id} className="flex items-center gap-3 py-3.5 px-2 hover:bg-slate-50/60 transition-colors rounded-xl border-b border-slate-100/80 last:border-0">
-              <div className={`w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center ${
-                tx.type === "deposit"
-                  ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                  : "bg-rose-50 text-rose-500 border border-rose-100"
-              }`}>
+            <li key={tx.id} className="flex items-center gap-3 py-3.5 px-3 hover:bg-slate-50/80 transition-colors rounded-2xl border border-slate-100/80 mb-2 bg-white shadow-xs">
+              <div
+                className={`rounded-xl flex items-center justify-center shrink-0 ${
+                  tx.type === "deposit"
+                    ? "bg-emerald-100/80 text-emerald-600 border border-emerald-200/60"
+                    : "bg-rose-100/80 text-rose-500 border border-rose-200/60"
+                }`}
+                style={{ flex: "0 0 36px", width: "36px", height: "36px" }}
+              >
                 {tx.type === "deposit" ? (
-                  <ArrowDownToLine size={20} />
+                  <ArrowDownToLine size={18} />
                 ) : (
-                  <ArrowUpFromLine size={20} />
+                  <ArrowUpFromLine size={18} />
                 )}
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0" style={{ flex: "1 1 auto" }}>
                 <div className="font-bold text-slate-800 text-sm truncate">
                   {tx.type === "withdraw" ? "Rút tiền" : (tx.note || "Nạp tiền")}
                 </div>
-                <div className="text-[11px] text-slate-400 mt-0.5 flex flex-wrap items-center gap-2">
+                <div className="text-[11px] text-slate-400 mt-0.5 flex flex-wrap items-center gap-1.5">
                   <span className="whitespace-nowrap">{formatVNDateTime(tx.createdAt)}</span>
                   <span>•</span>
                   {tx.status === "approved" && (
-                    <span className="text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    <span className="text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 text-[10px]">
                       Đã duyệt
                     </span>
                   )}
                   {tx.status === "rejected" && (
-                    <span className="text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
+                    <span className="text-rose-600 font-bold bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200 text-[10px]">
                       Từ chối
                     </span>
                   )}
                   {tx.status === "pending" && (
-                    <span className="text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                    <span className="text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 text-[10px]">
                       Chờ duyệt
                     </span>
                   )}
                 </div>
               </div>
-              <div className="text-right shrink-0">
-                <b className={`font-mono text-base font-extrabold ${tx.type === "deposit" ? "text-emerald-600" : "text-slate-800"}`}>
+              <div className="text-right shrink-0 ml-2" style={{ flex: "0 0 auto" }}>
+                <span
+                  className={`font-mono font-extrabold tracking-tight block ${
+                    tx.type === "deposit" ? "text-emerald-600" : "text-slate-900"
+                  }`}
+                  style={{ fontSize: "18px" }}
+                >
                   {tx.type === "deposit" ? "+" : "-"}{formatVND(Number(tx.amount))}
-                </b>
+                </span>
               </div>
             </li>
           ))}
