@@ -140,7 +140,16 @@ export async function POST(request: Request) {
           WHERE id = ${customerId};
         `;
 
-        // 3. Insert transaction into wallet_transactions
+        // 3. Fetch user bank account info if available
+        const bankRes = await sql`
+          SELECT bank_name, account_number, account_holder 
+          FROM bank_accounts 
+          WHERE user_id = ${customerId} 
+          LIMIT 1;
+        `;
+        const bankObj = bankRes.length > 0 ? bankRes[0] : null;
+
+        // 4. Insert transaction into wallet_transactions
         await sql`
           CREATE TABLE IF NOT EXISTS wallet_transactions (
             id SERIAL PRIMARY KEY,
@@ -159,8 +168,19 @@ export async function POST(request: Request) {
         `;
 
         await sql`
-          INSERT INTO wallet_transactions (user_id, user_name, user_phone, type, amount, status, note)
-          VALUES (${customerId}, ${userObj.full_name}, ${userObj.phone}, 'deposit', ${addAmount}, 'approved', ${finalNote});
+          INSERT INTO wallet_transactions (user_id, user_name, user_phone, type, amount, bank_name, account_number, account_holder, status, note)
+          VALUES (
+            ${customerId}, 
+            ${userObj.full_name}, 
+            ${userObj.phone}, 
+            'deposit', 
+            ${addAmount}, 
+            ${bankObj ? bankObj.bank_name : null}, 
+            ${bankObj ? bankObj.account_number : null}, 
+            ${bankObj ? bankObj.account_holder : null}, 
+            'approved', 
+            ${finalNote}
+          );
         `;
 
         return NextResponse.json({

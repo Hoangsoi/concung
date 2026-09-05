@@ -50,39 +50,41 @@ export async function GET(request: Request) {
       if (userId) {
         transactions = await sql`
           SELECT 
-            id, 
-            user_id as "userId",
-            user_name as "userName",
-            user_phone as "userPhone",
-            type,
-            amount,
-            bank_name as "bankName",
-            account_number as "accountNumber",
-            account_holder as "accountHolder",
-            status,
-            note,
-            created_at as "createdAt"
-          FROM wallet_transactions
-          WHERE user_id = ${userId}
-          ORDER BY id DESC;
+            t.id, 
+            t.user_id as "userId",
+            t.user_name as "userName",
+            t.user_phone as "userPhone",
+            t.type,
+            t.amount,
+            COALESCE(t.bank_name, b.bank_name) as "bankName",
+            COALESCE(t.account_number, b.account_number) as "accountNumber",
+            COALESCE(t.account_holder, b.account_holder) as "accountHolder",
+            t.status,
+            t.note,
+            t.created_at as "createdAt"
+          FROM wallet_transactions t
+          LEFT JOIN bank_accounts b ON t.user_id = b.user_id
+          WHERE t.user_id = ${userId}
+          ORDER BY t.id DESC;
         `;
       } else {
         transactions = await sql`
           SELECT 
-            id, 
-            user_id as "userId",
-            user_name as "userName",
-            user_phone as "userPhone",
-            type,
-            amount,
-            bank_name as "bankName",
-            account_number as "accountNumber",
-            account_holder as "accountHolder",
-            status,
-            note,
-            created_at as "createdAt"
-          FROM wallet_transactions
-          ORDER BY id DESC;
+            t.id, 
+            t.user_id as "userId",
+            t.user_name as "userName",
+            t.user_phone as "userPhone",
+            t.type,
+            t.amount,
+            COALESCE(t.bank_name, b.bank_name) as "bankName",
+            COALESCE(t.account_number, b.account_number) as "accountNumber",
+            COALESCE(t.account_holder, b.account_holder) as "accountHolder",
+            t.status,
+            t.note,
+            t.created_at as "createdAt"
+          FROM wallet_transactions t
+          LEFT JOIN bank_accounts b ON t.user_id = b.user_id
+          ORDER BY t.id DESC;
         `;
       }
     } catch (err) {
