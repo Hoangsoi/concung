@@ -216,9 +216,6 @@ export default function AccountPage() {
           <button className={styles.saveBtn} onClick={() => setIsEditingBank(true)}>
             <Edit3 size={16} className="inline mr-1" /> Cập nhật tài khoản khác
           </button>
-          <button className={styles.unlinkBtn} onClick={handleUnlinkBank}>
-            <Trash2 size={16} className="inline mr-1" /> Hủy liên kết tài khoản
-          </button>
         </div>
       ) : (
         /* Case 2: Form to Link or Update Bank Account */
