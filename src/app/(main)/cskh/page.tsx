@@ -2,11 +2,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Headphones, PhoneCall, MessageCircle, HelpCircle, ShieldCheck, Truck, RotateCcw, ChevronDown, ChevronUp, Send } from "lucide-react";
+import { Headphones, PhoneCall, MessageCircle, HelpCircle, ShieldCheck, Truck, RotateCcw, ChevronDown, ChevronUp, Send, Sparkles } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { HOTLINE_CUSTOMER_CARE, HOTLINE_PURCHASE } from "@/lib/constants";
+import { openCrispChat } from "@/components/common/CrispChat";
 
 export default function CSKHPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -27,7 +28,7 @@ export default function CSKHPage() {
     },
     {
       q: "Tôi muốn thay đổi địa chỉ giao hàng thì làm thế nào?",
-      a: "Vui lòng gọi ngay Hotline CSKH 1800 6609 (miễn phí) hoặc nhắn tin qua mục Hỗ Trợ Khách Hàng để nhân viên hỗ trợ cập nhật thông tin đơn hàng kịp thời.",
+      a: "Vui lòng gọi ngay Hotline CSKH 1800 6609 (miễn phí) hoặc nhắn tin qua nút Chat Trực Tuyến Crisp CSKH để nhân viên hỗ trợ cập nhật thông tin đơn hàng kịp thời.",
     },
   ];
 
@@ -45,7 +46,7 @@ export default function CSKHPage() {
         </div>
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-slate-900">Trung Tâm Chăm Sóc Khách Hàng</h1>
-          <p className="text-xs text-slate-500">Con Cưng luôn sẵn sàng hỗ trợ & tư vấn 24/7 cho Mẹ & Bé</p>
+          <p className="text-xs text-slate-500">Con Cưng luôn sẵn sàng hỗ trợ & tư vấn 24/7 với Crisp Live Chat</p>
         </div>
       </div>
 
@@ -81,38 +82,39 @@ export default function CSKHPage() {
           </div>
         </div>
 
-        {/* Chat Zalo / Messenger Box */}
-        <div className="p-5 rounded-2xl bg-slate-900 text-white space-y-3 shadow-md">
+        {/* Crisp Live Chat Box */}
+        <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-900 to-indigo-950 text-white space-y-3 shadow-md border border-indigo-900/40">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sky-400">
-              <MessageCircle className="h-5 w-5" />
-              <span className="text-xs font-bold uppercase tracking-wider text-white">Trực tuyến 24/7</span>
+              <MessageCircle className="h-5 w-5 animate-pulse text-sky-400" />
+              <span className="text-xs font-bold uppercase tracking-wider text-white">Chat Trực Tuyến Crisp CSKH</span>
             </div>
             <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
-              Đang hoạt động
+              ● Trực tuyến 24/7
             </span>
           </div>
 
           <div>
-            <p className="text-xs text-slate-400">Hỗ trợ nhắn tin giải đáp nhanh chóng:</p>
-            <p className="text-lg font-bold text-white">Chat Zalo & Messenger</p>
+            <p className="text-xs text-slate-300">Nhắn tin trực tiếp với Chuyên viên CSKH Con Cưng:</p>
+            <p className="text-lg font-black text-white">Crisp Live Chat Siêu Tốc</p>
           </div>
 
           <div className="pt-2 flex gap-2">
+            <button
+              onClick={openCrispChat}
+              className="flex-1 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white text-xs font-black py-2.5 px-4 rounded-xl text-center transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Chat Trực Tuyến Ngay
+            </button>
             <a
               href="https://zalo.me"
               target="_blank"
               rel="noreferrer"
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl text-center transition-colors"
+              className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold py-2.5 px-4 rounded-xl text-center transition-colors"
             >
-              Chat qua Zalo OA
+              Zalo OA
             </a>
-            <Link
-              href="/stores"
-              className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold py-2.5 px-4 rounded-xl text-center transition-colors"
-            >
-              Tìm siêu thị gần nhất
-            </Link>
           </div>
         </div>
       </div>

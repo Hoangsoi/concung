@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
 import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/constants";
+import { CrispChat } from "@/components/common/CrispChat";
 
 const beVietnamPro = Be_Vietnam_Pro({
   subsets: ["vietnamese", "latin"],
@@ -28,6 +29,7 @@ export default function RootLayout({
     <html lang="vi" className={`${beVietnamPro.variable} scroll-smooth`}>
       <body className="font-sans bg-surface-muted min-h-screen text-slate-800 flex flex-col">
         {children}
+        <CrispChat />
       </body>
     </html>
   );
