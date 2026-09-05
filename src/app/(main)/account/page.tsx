@@ -212,10 +212,6 @@ export default function AccountPage() {
           <p className={styles.noteText}>
             Tài khoản này được dùng để rút tiền từ Ví Con Cưng. Thông tin được lưu bảo mật và cố định cho các lần rút sau.
           </p>
-
-          <button className={styles.saveBtn} onClick={() => setIsEditingBank(true)}>
-            <Edit3 size={16} className="inline mr-1" /> Cập nhật tài khoản khác
-          </button>
         </div>
       ) : (
         /* Case 2: Form to Link or Update Bank Account */
