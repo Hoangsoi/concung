@@ -192,7 +192,7 @@ export async function POST(request: Request) {
           ${bank.account_number}, 
           ${bank.account_holder}, 
           'pending', 
-          'Rút tiền về tài khoản ngân hàng'
+          'Rút tiền'
         );
       `;
 

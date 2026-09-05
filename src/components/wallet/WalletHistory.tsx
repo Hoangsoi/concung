@@ -132,7 +132,7 @@ export function WalletHistory() {
               </div>
               <div>
                 <div className="font-bold text-slate-800 text-sm">
-                  {tx.note || (tx.type === "deposit" ? "Nạp tiền vào ví" : "Rút tiền về ngân hàng")}
+                  {tx.type === "withdraw" ? "Rút tiền" : (tx.note || "Nạp tiền")}
                 </div>
                 <div className="text-[11px] text-slate-400 mt-0.5 flex flex-wrap items-center gap-2">
                   <span className="whitespace-nowrap">{formatVNDateTime(tx.createdAt)}</span>
@@ -150,11 +150,6 @@ export function WalletHistory() {
                   {tx.status === "pending" && (
                     <span className="text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
                       Chờ duyệt
-                    </span>
-                  )}
-                  {tx.bankName && (
-                    <span className="text-slate-500 font-medium">
-                      ({tx.bankName} - {tx.accountNumber})
                     </span>
                   )}
                 </div>
