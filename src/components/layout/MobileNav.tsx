@@ -43,7 +43,7 @@ export function MobileNav() {
       },
     },
     {
-      name: "Tôi",
+      name: "Tài Khoản",
       href: "/account",
       icon: User,
       isActive:
