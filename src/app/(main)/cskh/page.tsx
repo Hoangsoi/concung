@@ -14,16 +14,16 @@ export default function CSKHPage() {
         </div>
         <div>
           <h1 className="text-xl sm:text-2xl font-black text-slate-900">Trung Tâm Chăm Sóc Khách Hàng</h1>
-          <p className="text-xs text-slate-500">Con Cưng luôn sẵn sàng hỗ trợ & tư vấn 24/7 với Crisp Live Chat</p>
+          <p className="text-xs text-slate-500">Con Cưng luôn sẵn sàng hỗ trợ & tư vấn 24/7</p>
         </div>
       </div>
 
-      {/* Crisp Live Chat Box */}
+      {/* Live Chat Box */}
       <div className="p-6 rounded-2xl bg-gradient-to-r from-slate-900 to-indigo-950 text-white space-y-4 shadow-md border border-indigo-900/40">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sky-400">
             <MessageCircle className="h-5 w-5 animate-pulse text-sky-400" />
-            <span className="text-xs font-bold uppercase tracking-wider text-white">Chat Trực Tuyến Crisp CSKH</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-white">Chat Trực Tuyến CSKH</span>
           </div>
           <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-full font-bold">
             ● Trực tuyến 24/7
@@ -32,7 +32,7 @@ export default function CSKHPage() {
 
         <div>
           <p className="text-xs text-slate-300">Nhắn tin trực tiếp với Chuyên viên CSKH Con Cưng:</p>
-          <p className="text-xl font-black text-white mt-1">Crisp Live Chat Siêu Tốc</p>
+          <p className="text-xl font-black text-white mt-1">Chat Trực Tuyến Siêu Tốc</p>
         </div>
 
         <div className="pt-2 flex gap-3">
