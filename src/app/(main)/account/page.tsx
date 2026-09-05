@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Star, Phone, CalendarDays, Landmark, ChevronRight, Shield, LogOut, X, CheckCircle2, Edit3, Trash2, Award, Crown, Gem, Sparkles, Trophy, ShieldCheck } from "lucide-react";
 import styles from "./account.module.css";
+import { formatVNDate, formatVNDateTime } from "@/lib/dateUtils";
 
 type Profile = {
   id?: number;
@@ -358,16 +359,7 @@ export default function AccountPage() {
           </span>
           <div>
             <label>NGÀY THAM GIA</label>
-            <strong>
-              {user.createdAt
-                ? new Date(user.createdAt).toLocaleDateString("vi-VN", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                    timeZone: "Asia/Ho_Chi_Minh",
-                  })
-                : "Chưa cập nhật"}
-            </strong>
+            <strong>{formatVNDate(user.createdAt)}</strong>
           </div>
         </div>
       </div>

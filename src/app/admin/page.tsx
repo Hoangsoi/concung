@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { formatVNDateTime, formatVNDate } from "@/lib/dateUtils";
 import {
   TrendingUp,
   Users,
@@ -821,7 +822,7 @@ export default function AdminPage() {
                           )}
                         </td>
                         <td className="py-3.5 px-4 text-center text-slate-400 text-[11px] border-r border-slate-800">
-                          {new Date(tx.createdAt).toLocaleString("vi-VN")}
+                          {formatVNDateTime(tx.createdAt)}
                         </td>
                         <td className="py-3.5 px-4 text-center border-r border-slate-800">
                           {tx.status === "pending" && (
@@ -1002,7 +1003,7 @@ export default function AdminPage() {
                         )}
                       </td>
                       <td className="py-3.5 px-3 text-center text-slate-400 text-[11px] border-r border-slate-800">
-                        {new Date(c.createdAt).toLocaleDateString("vi-VN")}
+                        {formatVNDate(c.createdAt)}
                       </td>
                       <td className="py-3.5 px-3 text-center">
                         {c.phone === "admin" || c.phone?.toLowerCase().includes("admin") || c.fullName?.toLowerCase().includes("admin") ? (
@@ -1511,7 +1512,7 @@ export default function AdminPage() {
                                 )}
                               </td>
                               <td className="py-3 px-3 text-center text-slate-400 text-[11px] border-r border-slate-800">
-                                {new Date(tx.createdAt).toLocaleString("vi-VN")}
+                                {formatVNDateTime(tx.createdAt)}
                               </td>
                               <td className="py-3 px-3 text-center">
                                 {tx.status === "pending" && (
