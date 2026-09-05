@@ -463,16 +463,16 @@ export default function AdminPage() {
 
           <div className="rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden shadow-xl">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-300">
+              <table className="w-full text-left text-xs text-slate-300 border-collapse">
                 <thead className="border-b border-slate-800 bg-slate-950 text-slate-400 uppercase font-semibold">
                   <tr>
-                    <th className="py-3.5 px-4">Mã GD</th>
-                    <th className="py-3.5 px-4">Khách Hàng</th>
-                    <th className="py-3.5 px-4">Loại GD</th>
-                    <th className="py-3.5 px-4">Số Tiền</th>
-                    <th className="py-3.5 px-4">Thông Tin Ngân Hàng</th>
-                    <th className="py-3.5 px-4">Thời Gian</th>
-                    <th className="py-3.5 px-4">Trạng Thái</th>
+                    <th className="py-3.5 px-4 border-r border-slate-800">Mã GD</th>
+                    <th className="py-3.5 px-4 border-r border-slate-800">Khách Hàng</th>
+                    <th className="py-3.5 px-4 border-r border-slate-800">Loại GD</th>
+                    <th className="py-3.5 px-4 border-r border-slate-800">Số Tiền</th>
+                    <th className="py-3.5 px-4 border-r border-slate-800">Thông Tin Ngân Hàng</th>
+                    <th className="py-3.5 px-4 border-r border-slate-800">Thời Gian</th>
+                    <th className="py-3.5 px-4 border-r border-slate-800">Trạng Thái</th>
                     <th className="py-3.5 px-4 text-right">Xử Lý Admin</th>
                   </tr>
                 </thead>
@@ -486,12 +486,12 @@ export default function AdminPage() {
                   ) : (
                     filteredTxs.map((tx) => (
                       <tr key={tx.id} className="hover:bg-slate-800/40 transition-colors">
-                        <td className="py-3.5 px-4 font-bold text-white">#{tx.id}</td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-3.5 px-4 font-bold text-white border-r border-slate-800">#{tx.id}</td>
+                        <td className="py-3.5 px-4 border-r border-slate-800">
                           <div className="font-bold text-white">{tx.userName}</div>
                           <div className="text-[11px] text-slate-400">{tx.userPhone}</div>
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-3.5 px-4 border-r border-slate-800">
                           {tx.type === "deposit" ? (
                             <span className="inline-flex items-center gap-1 text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
                               <ArrowDownToLine className="h-3 w-3" /> Nạp Tiền
@@ -502,10 +502,10 @@ export default function AdminPage() {
                             </span>
                           )}
                         </td>
-                        <td className="py-3.5 px-4 font-black text-sm text-white">
+                        <td className="py-3.5 px-4 font-black text-sm text-white border-r border-slate-800">
                           {formatVND(Number(tx.amount))}
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-3.5 px-4 border-r border-slate-800">
                           {tx.bankName ? (
                             <div>
                               <div className="font-bold text-slate-200">{tx.bankName}</div>
@@ -516,10 +516,10 @@ export default function AdminPage() {
                             <span className="text-slate-500 italic">Chưa liên kết</span>
                           )}
                         </td>
-                        <td className="py-3.5 px-4 text-slate-400 text-[11px]">
+                        <td className="py-3.5 px-4 text-slate-400 text-[11px] border-r border-slate-800">
                           {new Date(tx.createdAt).toLocaleString("vi-VN")}
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-3.5 px-4 border-r border-slate-800">
                           {tx.status === "pending" && (
                             <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1">
                               <Clock className="h-3 w-3" /> Chờ Duyệt
@@ -570,13 +570,13 @@ export default function AdminPage() {
       {activeTab === "customers" && (
         <div className="rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
+            <table className="w-full text-left text-xs text-slate-300 border-collapse">
               <thead className="border-b border-slate-800 bg-slate-950 text-slate-400 uppercase font-semibold">
                 <tr>
-                  <th className="py-3.5 px-4">Mã KH</th>
-                  <th className="py-3.5 px-4">Họ và Tên</th>
-                  <th className="py-3.5 px-4">Số Điện Thoại</th>
-                  <th className="py-3.5 px-4">Tài Khoản Ngân Hàng Liên Kết</th>
+                  <th className="py-3.5 px-4 border-r border-slate-800">Mã KH</th>
+                  <th className="py-3.5 px-4 border-r border-slate-800">Họ và Tên</th>
+                  <th className="py-3.5 px-4 border-r border-slate-800">Số Điện Thoại</th>
+                  <th className="py-3.5 px-4 border-r border-slate-800">Tài Khoản Ngân Hàng Liên Kết</th>
                   <th className="py-3.5 px-4">Ngày Đăng Ký</th>
                 </tr>
               </thead>
@@ -590,10 +590,10 @@ export default function AdminPage() {
                 ) : (
                   filteredCustomers.map((c) => (
                     <tr key={c.id} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="py-3.5 px-4 font-bold text-white">#KH-{c.id}</td>
-                      <td className="py-3.5 px-4 font-bold text-slate-100">{c.fullName}</td>
-                      <td className="py-3.5 px-4 font-mono text-rose-400 font-bold">{c.phone}</td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4 font-bold text-white border-r border-slate-800">#KH-{c.id}</td>
+                      <td className="py-3.5 px-4 font-bold text-slate-100 border-r border-slate-800">{c.fullName}</td>
+                      <td className="py-3.5 px-4 font-mono text-rose-400 font-bold border-r border-slate-800">{c.phone}</td>
+                      <td className="py-3.5 px-4 border-r border-slate-800">
                         {c.bankName ? (
                           <div className="space-y-0.5">
                             <div className="font-bold text-emerald-400 flex items-center gap-1">
