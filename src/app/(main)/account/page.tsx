@@ -225,15 +225,15 @@ export default function AccountPage() {
         <h2>{user.fullName}</h2>
         {user.status === "frozen" ? (
           <span className="text-cyan-600 bg-cyan-50 font-bold px-3 py-1 rounded-full text-xs border border-cyan-200 inline-flex items-center gap-1">
-            ❄️ Tài khoản đang đóng băng
+            ❄️ Trạng thái: Đóng băng
           </span>
         ) : user.status === "locked" ? (
           <span className="text-red-600 bg-red-50 font-bold px-3 py-1 rounded-full text-xs border border-red-200 inline-flex items-center gap-1">
-            🔒 Tài khoản bị khóa
+            🔒 Trạng thái: Bị khóa
           </span>
         ) : (
           <span className="text-emerald-600 bg-emerald-50 font-bold px-3 py-1 rounded-full text-xs border border-emerald-200 inline-flex items-center gap-1">
-            ✓ Tài khoản bình thường
+            ✓ Trạng thái: Hoạt động
           </span>
         )}
       </section>
