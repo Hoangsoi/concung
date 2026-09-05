@@ -302,7 +302,6 @@ export default function AccountPage() {
         <div>
           <label>HẠNG HIỆN TẠI</label>
           <strong className="text-[#f52885] text-lg font-bold block">{user.tier || "Thành Viên"}</strong>
-          <small>Hạng thành viên của tài khoản được quản lý trực tiếp trên Neon DB</small>
         </div>
         <Shield className={styles.shield} size={88} />
       </section>
