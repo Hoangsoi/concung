@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, History, Wallet, Headphones, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { openCrispChat } from "@/components/common/CrispChat";
 
 export function MobileNav() {
   const pathname = usePathname();
@@ -37,6 +38,9 @@ export function MobileNav() {
       href: "/cskh",
       icon: Headphones,
       isActive: pathname === "/cskh" || pathname.startsWith("/cskh/"),
+      onClick: () => {
+        openCrispChat();
+      },
     },
     {
       name: "Tôi",
@@ -64,6 +68,7 @@ export function MobileNav() {
             <Link
               key={tab.name}
               href={tab.href}
+              onClick={tab.onClick}
               className={cn(
                 "flex flex-col items-center justify-center py-1 px-0.5 rounded-xl transition-all duration-200 group relative",
                 isActive
