@@ -5,13 +5,11 @@ import Link from "next/link";
 import {
   TrendingUp,
   Users,
-  Package,
   ShieldCheck,
   Home,
   CheckCircle2,
   XCircle,
   Clock,
-  ArrowUpRight,
   ArrowDownToLine,
   ArrowUpFromLine,
   Lock,
@@ -22,7 +20,6 @@ import {
   Landmark,
 } from "lucide-react";
 import { formatVND } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 interface Customer {
@@ -301,11 +298,8 @@ export default function AdminPage() {
             <ShieldCheck className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
               Quản Trị Hệ Thống Con Cưng
-              <Badge variant="official" className="text-[10px] bg-rose-500/20 text-rose-300 border-rose-500/30">
-                Neon DB Active
-              </Badge>
             </h1>
             <p className="text-xs text-slate-400">
               Quản lý tài khoản khách hàng, liên kết ngân hàng & duyệt nạp/rút tiền
@@ -407,7 +401,7 @@ export default function AdminPage() {
             <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 space-y-2">
               <span className="text-xs text-slate-400 font-medium">Khách Hàng Đã Đăng Ký</span>
               <p className="text-2xl font-black text-white">{customers.length} khách hàng</p>
-              <span className="text-[11px] text-emerald-400 font-bold">Lưu trữ trên Neon DB</span>
+              <span className="text-[11px] text-emerald-400 font-bold">Tài khoản hoạt động</span>
             </div>
 
             <div className="rounded-2xl border border-slate-800 bg-slate-900 p-5 space-y-2">
@@ -584,13 +578,12 @@ export default function AdminPage() {
                   <th className="py-3.5 px-4">Số Điện Thoại</th>
                   <th className="py-3.5 px-4">Tài Khoản Ngân Hàng Liên Kết</th>
                   <th className="py-3.5 px-4">Ngày Đăng Ký</th>
-                  <th className="py-3.5 px-4">Trạng Thái Neon DB</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
                 {filteredCustomers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-slate-500">
+                    <td colSpan={5} className="py-8 text-center text-slate-500">
                       Chưa có khách hàng nào trong cơ sở dữ liệu
                     </td>
                   </tr>
@@ -616,11 +609,6 @@ export default function AdminPage() {
                       </td>
                       <td className="py-3.5 px-4 text-slate-400 text-[11px]">
                         {new Date(c.createdAt).toLocaleDateString("vi-VN")}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full text-[10px] font-bold">
-                          ● Đã lưu Neon Postgres
-                        </span>
                       </td>
                     </tr>
                   ))
