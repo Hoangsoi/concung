@@ -17,11 +17,32 @@ async function verifyAdminAuth() {
 async function ensureUserColumns() {
   try {
     await sql`
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'active';
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS balance NUMERIC(15,2) DEFAULT 0;
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        full_name VARCHAR(255) NOT NULL,
+        phone VARCHAR(50) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        status VARCHAR(50) DEFAULT 'active',
+        balance NUMERIC(15,2) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'active';`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS balance NUMERIC(15,2) DEFAULT 0;`;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS bank_accounts (
+        id SERIAL PRIMARY KEY,
+        user_id INT UNIQUE NOT NULL,
+        bank_name VARCHAR(255) NOT NULL,
+        account_number VARCHAR(100) NOT NULL,
+        account_holder VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
     `;
   } catch (err) {
-    // Column might already exist
+    console.warn("ensureUserColumns warning:", err);
   }
 }
 
