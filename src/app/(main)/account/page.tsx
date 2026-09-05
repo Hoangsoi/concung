@@ -401,6 +401,7 @@ export default function AccountPage() {
         <div>
           <label>HẠNG HIỆN TẠI</label>
           <strong className="text-[#f52885] text-lg font-bold block">{user.tier || "Thành Viên"}</strong>
+          <small>Hoàn thành giao dịch để nâng hạng</small>
         </div>
         <Shield className={styles.shield} size={88} />
       </section>
