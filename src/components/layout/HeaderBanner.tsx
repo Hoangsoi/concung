@@ -6,7 +6,7 @@ export function HeaderBanner() {
     <div className="w-full bg-[#a60000] block m-0 p-0 border-0 outline-none leading-none overflow-hidden">
       <Link
         href="https://concung.com/landingpages-sua-thung-qua-to.html"
-        className="w-full text-center block m-0 p-0 border-0 outline-none hover:opacity-95 transition-opacity"
+        className="w-full text-center block m-0 p-0 border-0 outline-none hover:opacity-95 transition-opacity md:pointer-events-none md:cursor-default"
       >
         <img
           src="/images/header-campaign.webp"

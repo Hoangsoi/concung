@@ -60,7 +60,7 @@ export function Header() {
             </button>
 
             {/* Con Cung Image Logo - Shifted right inside 220px sidebar column */}
-            <Link href="/" className="flex items-center shrink-0">
+            <Link href="/" className="flex items-center shrink-0 md:pointer-events-none md:cursor-default">
               <div className="relative h-[48px] w-[134px] hover:opacity-95 transition-opacity">
                 <Image
                   src="/images/header/logo-concung.png"
@@ -74,16 +74,15 @@ export function Header() {
           </div>
 
           {/* Search Bar - Starts right at the 220px boundary matching Abbott main banner */}
-          <div className={styles.search}>
+          <div className={`${styles.search} md:pointer-events-none`}>
             <SearchBar placeholder="Ba mẹ muốn tìm mua gì hôm nay ?" />
           </div>
 
           {/* Right Shortcuts: Giỏ hàng & Ưu đãi + Speech Bubble Badge */}
           <div className={styles.shortcuts}>
             {/* Giỏ hàng Shortcut */}
-            <Link
-              href="/cart"
-              className="flex flex-col items-center justify-center text-[#333333] hover:text-[#ED1B68] transition-colors group relative"
+            <div
+              className="flex flex-col items-center justify-center text-[#333333] transition-colors group relative md:pointer-events-none md:cursor-default"
             >
               <div className="relative">
                 <img src="/images/header/cart-top.png" alt="" width={30} height={30} />
@@ -92,12 +91,12 @@ export function Header() {
                 </span>
               </div>
               <span className="text-[14px] font-medium mt-0.5 text-[#777777]">Giỏ hàng</span>
-            </Link>
+            </div>
 
-            {/* Ví Shortcut */}
+            {/* Ví Shortcut (ALLOWED) */}
             <Link
               href="/wallet"
-              className="flex flex-col items-center justify-center text-[#333333] hover:text-[#ED1B68] transition-colors group relative"
+              className="flex flex-col items-center justify-center text-[#333333] hover:text-[#ED1B68] transition-colors group relative cursor-pointer"
             >
               <div className="relative">
                 <Wallet className="h-7 w-7 text-[#888888] stroke-[1.5] group-hover:text-[#ED1B68]" />
@@ -106,13 +105,12 @@ export function Header() {
             </Link>
 
             {/* Ưu đãi Shortcut with Speech Bubble Badge */}
-            <Link
-              href="/account"
-              className="flex items-center gap-2 group relative"
+            <div
+              className="flex items-center gap-2 group relative md:pointer-events-none md:cursor-default"
             >
-              <div className="flex flex-col items-center justify-center text-[#333333] group-hover:text-[#ED1B68] transition-colors">
+              <div className="flex flex-col items-center justify-center text-[#333333] transition-colors">
                 <div className="relative">
-                  <Bell className="h-8 w-8 text-[#888888] stroke-[1.5] group-hover:text-[#ED1B68]" />
+                  <Bell className="h-8 w-8 text-[#888888] stroke-[1.5]" />
                   <span className="absolute -top-1.5 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF9500] text-[10px] font-bold text-white border border-white">
                     2
                   </span>
@@ -129,7 +127,7 @@ export function Header() {
                   <div>TÍNH 1</div>
                 </div>
               </div>
-            </Link>
+            </div>
           </div>
 
           {/* Mobile Right Cart Button */}

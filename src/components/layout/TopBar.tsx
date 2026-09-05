@@ -54,19 +54,19 @@ export function TopBar() {
           </span>
         </Link>
 
-        <Link href="/stores" className={styles.store}>
+        <div className={`${styles.store} md:pointer-events-none md:cursor-default`}>
           <img src="/images/header/store.png" alt="" />
           <span>
             Tìm Siêu Thị <strong>(1158)</strong>
           </span>
-        </Link>
+        </div>
 
-        <Link href="/account" className={styles.address}>
+        <div className={`${styles.address} md:pointer-events-none md:cursor-default`}>
           <span className={styles.clock} aria-hidden="true">
             ◷<small>1h</small>
           </span>
           <span>Nhập địa chỉ để mua hàng giao Siêu Tốc 1h</span>
-        </Link>
+        </div>
 
         {user ? (
           <div className="flex items-center gap-2">
