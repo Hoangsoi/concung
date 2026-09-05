@@ -23,6 +23,8 @@ import {
   Pencil,
   X,
   KeyRound,
+  PlusCircle,
+  Coins,
 } from "lucide-react";
 import { formatVND } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -83,6 +85,71 @@ export default function AdminPage() {
     accountHolder: "",
   });
   const [isSubmittingCustomer, setIsSubmittingCustomer] = useState(false);
+
+  // Add Money Modal State
+  const [addingMoneyCustomer, setAddingMoneyCustomer] = useState<Customer | null>(null);
+  const [addMoneyAmount, setAddMoneyAmount] = useState<string>("100000");
+  const [addMoneyOption, setAddMoneyOption] = useState<"nap_tien" | "thuong" | "custom">("nap_tien");
+  const [addMoneyCustomNote, setAddMoneyCustomNote] = useState<string>("");
+  const [isSubmittingAddMoney, setIsSubmittingAddMoney] = useState(false);
+
+  const handleOpenAddMoneyModal = (c: Customer) => {
+    setAddingMoneyCustomer(c);
+    setAddMoneyAmount("100000");
+    setAddMoneyOption("nap_tien");
+    setAddMoneyCustomNote("");
+  };
+
+  const handleSaveAddMoney = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addingMoneyCustomer) return;
+    const numAmt = Number(addMoneyAmount);
+    if (isNaN(numAmt) || numAmt <= 0) {
+      alert("Vui lòng nhập số tiền hợp lệ lớn hơn 0");
+      return;
+    }
+
+    let finalNote = "Nạp tiền";
+    if (addMoneyOption === "thuong") {
+      finalNote = "Thưởng";
+    } else if (addMoneyOption === "custom") {
+      finalNote = addMoneyCustomNote.trim() || "Nạp tiền";
+    }
+
+    setIsSubmittingAddMoney(true);
+    try {
+      const res = await fetch("/api/admin/customers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "addMoney",
+          customerId: addingMoneyCustomer.id,
+          amount: numAmt,
+          note: finalNote,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert(data.message || "Cộng tiền thành công!");
+        setCustomers((prev) =>
+          prev.map((c) =>
+            c.id === addingMoneyCustomer.id
+              ? { ...c, balance: (Number(c.balance) || 0) + numAmt }
+              : c
+          )
+        );
+        setAddingMoneyCustomer(null);
+        void loadAdminData();
+      } else {
+        alert(data.error || "Cộng tiền thất bại");
+      }
+    } catch {
+      alert("Lỗi kết nối khi cộng tiền");
+    } finally {
+      setIsSubmittingAddMoney(false);
+    }
+  };
 
   const handleUpdateCustomerStatus = async (customerId: number, status: "active" | "frozen" | "locked") => {
     try {
@@ -679,6 +746,7 @@ export default function AdminPage() {
                   <th className="py-3.5 px-4 text-center border-r border-slate-800">Họ và Tên</th>
                   <th className="py-3.5 px-4 text-center border-r border-slate-800">Số Điện Thoại</th>
                   <th className="py-3.5 px-4 text-center border-r border-slate-800">Mật Khẩu</th>
+                  <th className="py-3.5 px-4 text-center border-r border-slate-800">Số Dư Ví</th>
                   <th className="py-3.5 px-4 text-center border-r border-slate-800">Tài Khoản Ngân Hàng Liên Kết</th>
                   <th className="py-3.5 px-4 text-center border-r border-slate-800">Trạng Thái</th>
                   <th className="py-3.5 px-4 text-center border-r border-slate-800">Ngày Đăng Ký</th>
@@ -688,7 +756,7 @@ export default function AdminPage() {
               <tbody className="divide-y divide-slate-800">
                 {filteredCustomers.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-slate-500">
+                    <td colSpan={9} className="py-8 text-center text-slate-500">
                       Chưa có khách hàng nào trong cơ sở dữ liệu
                     </td>
                   </tr>
@@ -706,6 +774,9 @@ export default function AdminPage() {
                         ) : (
                           <span className="text-slate-500 italic">—</span>
                         )}
+                      </td>
+                      <td className="py-3.5 px-4 text-center font-mono font-bold text-emerald-400 text-sm border-r border-slate-800">
+                        {formatVND(Number(c.balance || 0))}
                       </td>
                       <td className="py-3.5 px-4 text-center border-r border-slate-800">
                         {c.bankName ? (
@@ -748,6 +819,14 @@ export default function AdminPage() {
                           </span>
                         ) : (
                           <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                            <button
+                              onClick={() => handleOpenAddMoneyModal(c)}
+                              className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1 shadow-sm"
+                              title="Cộng tiền cho khách hàng"
+                            >
+                              <PlusCircle className="h-3.5 w-3.5" /> + Cộng Tiền
+                            </button>
+
                             <button
                               onClick={() => handleOpenEditModal(c)}
                               className="bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1"
@@ -799,6 +878,139 @@ export default function AdminPage() {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* ADD MONEY MODAL */}
+      {addingMoneyCustomer && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl space-y-4 p-6">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Coins className="h-5 w-5 text-emerald-400" />
+                Cộng Tiền Cho Khách Hàng #{addingMoneyCustomer.id}
+              </h3>
+              <button
+                onClick={() => setAddingMoneyCustomer(null)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs space-y-1">
+              <div className="text-slate-400">Khách hàng: <strong className="text-white">{addingMoneyCustomer.fullName}</strong></div>
+              <div className="text-slate-400">Số điện thoại: <strong className="text-rose-400 font-mono">{addingMoneyCustomer.phone}</strong></div>
+              <div className="text-slate-400">Số dư hiện tại: <strong className="text-emerald-400 font-mono">{formatVND(Number(addingMoneyCustomer.balance || 0))}</strong></div>
+            </div>
+
+            <form onSubmit={handleSaveAddMoney} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Số Tiền Cần Cộng (VNĐ) <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={addMoneyAmount}
+                  onChange={(e) => setAddMoneyAmount(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm font-bold font-mono text-emerald-400 focus:outline-none focus:border-rose-500"
+                  placeholder="Nhập số tiền..."
+                  required
+                />
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {[100000, 500000, 1000000, 5000000, 10000000].map((presetAmt) => (
+                    <button
+                      key={presetAmt}
+                      type="button"
+                      onClick={() => setAddMoneyAmount(String(presetAmt))}
+                      className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold px-2 py-1 rounded-md border border-slate-700 transition-colors cursor-pointer"
+                    >
+                      +{presetAmt.toLocaleString("vi-VN")}đ
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-slate-300">
+                  Nội Dung Giao Dịch Hiển Thị Bên Khách Hàng
+                </label>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setAddMoneyOption("nap_tien")}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer ${
+                      addMoneyOption === "nap_tien"
+                        ? "bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-sm"
+                        : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    Nạp tiền
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setAddMoneyOption("thuong")}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer ${
+                      addMoneyOption === "thuong"
+                        ? "bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-sm"
+                        : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    Thưởng
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setAddMoneyOption("custom")}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer ${
+                      addMoneyOption === "custom"
+                        ? "bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-sm"
+                        : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    Tùy chỉnh
+                  </button>
+                </div>
+
+                {addMoneyOption === "custom" && (
+                  <div className="pt-1">
+                    <input
+                      type="text"
+                      value={addMoneyCustomNote}
+                      onChange={(e) => setAddMoneyCustomNote(e.target.value)}
+                      placeholder="Nhập nội dung tùy chỉnh..."
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
+                    />
+                  </div>
+                )}
+
+                <p className="text-[11px] text-slate-500 italic">
+                  * Nếu không nhập gì, nội dung hiển thị phía khách hàng mặc định là <strong className="text-emerald-400 font-normal">Nạp tiền</strong>.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 border-t border-slate-800 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setAddingMoneyCustomer(null)}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingAddMoney}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer shadow-lg shadow-emerald-600/20"
+                >
+                  {isSubmittingAddMoney ? "Đang xử lý..." : "Xác Nhận Cộng Tiền"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -12,7 +12,7 @@ export async function GET() {
     }
 
     try {
-      const rows = await sql`SELECT id, full_name, phone, created_at FROM users WHERE id = ${id} LIMIT 1`;
+      const rows = await sql`SELECT id, full_name, phone, COALESCE(balance, 0) as balance, created_at FROM users WHERE id = ${id} LIMIT 1`;
       if (rows.length > 0) {
         const user = rows[0];
         return NextResponse.json(
@@ -21,6 +21,7 @@ export async function GET() {
               id: user.id,
               fullName: user.full_name,
               phone: user.phone,
+              balance: Number(user.balance || 0),
               createdAt: user.created_at,
             },
           },
