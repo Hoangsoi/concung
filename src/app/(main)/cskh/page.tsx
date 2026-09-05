@@ -35,22 +35,14 @@ export default function CSKHPage() {
           <p className="text-xl font-black text-white mt-1">Chat Trực Tuyến Siêu Tốc</p>
         </div>
 
-        <div className="pt-2 flex gap-3">
+        <div className="pt-2">
           <button
             onClick={openCrispChat}
-            className="flex-1 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white text-sm font-black py-3 px-4 rounded-xl text-center transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white text-sm font-black py-3 px-4 rounded-xl text-center transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
           >
             <MessageCircle className="h-5 w-5" />
             Chat Trực Tuyến Ngay
           </button>
-          <a
-            href="https://zalo.me"
-            target="_blank"
-            rel="noreferrer"
-            className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-bold py-3 px-6 rounded-xl text-center transition-colors flex items-center justify-center"
-          >
-            Zalo OA
-          </a>
         </div>
       </div>
 
