@@ -12,7 +12,20 @@ export async function GET() {
     }
 
     try {
-      const rows = await sql`SELECT id, full_name, phone, COALESCE(balance, 0) as balance, COALESCE(tier, 'Thành Viên') as tier, COALESCE(credit_score, 100) as "creditScore", created_at FROM users WHERE id = ${id} LIMIT 1`;
+      const rows = await sql`
+        SELECT 
+          id, 
+          full_name, 
+          phone, 
+          COALESCE(balance, 0) as balance, 
+          COALESCE(tier, 'Thành Viên') as tier, 
+          COALESCE(credit_score, 100) as "creditScore", 
+          COALESCE(status, 'active') as status,
+          created_at 
+        FROM users 
+        WHERE id = ${id} 
+        LIMIT 1
+      `;
       if (rows.length > 0) {
         const user = rows[0];
         return NextResponse.json(
@@ -23,7 +36,8 @@ export async function GET() {
               phone: user.phone,
               balance: Number(user.balance || 0),
               tier: user.tier || "Thành Viên",
-              creditScore: Number(user.creditScore || 100),
+              creditScore: Number(user.creditScore ?? 100),
+              status: user.status || "active",
               createdAt: user.created_at,
             },
           },

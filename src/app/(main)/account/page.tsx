@@ -6,7 +6,16 @@ import { useRouter } from "next/navigation";
 import { Star, Phone, CalendarDays, Landmark, ChevronRight, Shield, LogOut, X, CheckCircle2, Edit3, Trash2 } from "lucide-react";
 import styles from "./account.module.css";
 
-type Profile = { fullName: string; phone: string; createdAt: string | null };
+type Profile = {
+  id?: number;
+  fullName: string;
+  phone: string;
+  balance?: number;
+  tier?: string;
+  creditScore?: number;
+  status?: "active" | "frozen" | "locked";
+  createdAt: string | null;
+};
 
 export type LinkedBank = {
   bankName: string;
@@ -204,17 +213,71 @@ export default function AccountPage() {
   return <div className={styles.page}><div className={styles.container}>
     <h1>Tài khoản</h1>
     {loading ? <p role="status" className={styles.message}>Đang tải thông tin tài khoản…</p> : guest ? <div className={styles.guest}><Shield size={42} /><h2>Chào mừng ba mẹ!</h2><p>Đăng nhập để xem thông tin tài khoản của mình.</p><Link href="/login">Đăng nhập</Link><Link href="/register">Đăng ký tài khoản</Link></div> : user && <>
-      <section className={styles.profile} aria-label="Hồ sơ tài khoản"><div className={styles.avatar}>{user.fullName.trim().slice(0,1).toLocaleUpperCase("vi-VN")}</div><h2>{user.fullName}</h2><span>Trạng thái chưa cập nhật</span></section>
+      <section className={styles.profile} aria-label="Hồ sơ tài khoản">
+        <div className={styles.avatar}>
+          {user.fullName.trim().slice(0, 1).toLocaleUpperCase("vi-VN")}
+        </div>
+        <h2>{user.fullName}</h2>
+        {user.status === "frozen" ? (
+          <span className="text-cyan-600 bg-cyan-50 font-bold px-3 py-1 rounded-full text-xs border border-cyan-200 inline-flex items-center gap-1">
+            ❄️ Tài khoản đang đóng băng
+          </span>
+        ) : user.status === "locked" ? (
+          <span className="text-red-600 bg-red-50 font-bold px-3 py-1 rounded-full text-xs border border-red-200 inline-flex items-center gap-1">
+            🔒 Tài khoản bị khóa
+          </span>
+        ) : (
+          <span className="text-emerald-600 bg-emerald-50 font-bold px-3 py-1 rounded-full text-xs border border-emerald-200 inline-flex items-center gap-1">
+            ✓ Tài khoản bình thường
+          </span>
+        )}
+      </section>
       <h3>Thông tin cá nhân</h3>
       <div className={styles.list}>
-        <div className={styles.row}><span className={styles.pinkIcon}><Star size={20} /></span><div><label>ĐIỂM TÍN NHIỆM</label><strong className={styles.pink}>Chưa cập nhật</strong></div><span className={styles.track} aria-hidden="true" /></div>
-        <div className={styles.row}><span className={styles.icon}><Phone size={20} /></span><div><label>ĐIỆN THOẠI</label><strong>{user.phone}</strong></div></div>
-        <div className={styles.row}><span className={styles.icon}><CalendarDays size={20} /></span><div><label>NGÀY THAM GIA</label><strong>{user.createdAt ? new Date(user.createdAt).toLocaleDateString("vi-VN", { day:"2-digit", month:"2-digit", year:"numeric", timeZone:"Asia/Ho_Chi_Minh" }) : "Chưa cập nhật"}</strong></div></div>
+        <div className={styles.row}>
+          <span className={styles.pinkIcon}>
+            <Star size={20} />
+          </span>
+          <div>
+            <label>ĐIỂM TÍN NHIỆM</label>
+            <strong className={styles.pink}>{user.creditScore ?? 100} điểm</strong>
+          </div>
+          <span className={styles.track} aria-hidden="true" />
+        </div>
+        <div className={styles.row}>
+          <span className={styles.icon}>
+            <Phone size={20} />
+          </span>
+          <div>
+            <label>ĐIỆN THOẠI</label>
+            <strong>{user.phone}</strong>
+          </div>
+        </div>
+        <div className={styles.row}>
+          <span className={styles.icon}>
+            <CalendarDays size={20} />
+          </span>
+          <div>
+            <label>NGÀY THAM GIA</label>
+            <strong>
+              {user.createdAt
+                ? new Date(user.createdAt).toLocaleDateString("vi-VN", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    timeZone: "Asia/Ho_Chi_Minh",
+                  })
+                : "Chưa cập nhật"}
+            </strong>
+          </div>
+        </div>
       </div>
 
       {/* Bank Account linkage row */}
       <button className={`${styles.row} ${styles.bank}`} onClick={() => dialog.current?.showModal()}>
-        <span className={styles.blueIcon}><Landmark size={20} /></span>
+        <span className={styles.blueIcon}>
+          <Landmark size={20} />
+        </span>
         <div>
           <strong>Tài khoản ngân hàng</strong>
           <small>
@@ -226,8 +289,22 @@ export default function AccountPage() {
         <ChevronRight size={18} />
       </button>
 
-      <h3>Hạng thành viên</h3><section className={styles.tier}><div className={styles.level}>—</div><div><label>HẠNG HIỆN TẠI</label><strong>Chưa cập nhật</strong><small>Thông tin hạng thành viên chưa được thiết lập</small></div><Shield className={styles.shield} size={88} /></section>
-      <button className={styles.logout} onClick={logout} disabled={loggingOut}><LogOut size={20} />{loggingOut ? "Đang đăng xuất…" : "Đăng xuất"}</button>
+      <h3>Hạng thành viên</h3>
+      <section className={styles.tier}>
+        <div className={styles.level}>
+          {user.tier ? user.tier.slice(0, 2).toUpperCase() : "TV"}
+        </div>
+        <div>
+          <label>HẠNG HIỆN TẠI</label>
+          <strong className="text-[#f52885] text-lg font-bold block">{user.tier || "Thành Viên"}</strong>
+          <small>Hạng thành viên của tài khoản được quản lý trực tiếp trên Neon DB</small>
+        </div>
+        <Shield className={styles.shield} size={88} />
+      </section>
+      <button className={styles.logout} onClick={logout} disabled={loggingOut}>
+        <LogOut size={20} />
+        {loggingOut ? "Đang đăng xuất…" : "Đăng xuất"}
+      </button>
     </>}
     {error && <div role="alert" className={styles.message}><p>{error}</p><button onClick={load}>Thử lại</button></div>}
 
