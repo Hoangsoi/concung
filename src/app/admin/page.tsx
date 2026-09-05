@@ -82,6 +82,19 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingData, setLoadingData] = useState(false);
 
+  // Pagination State (20 items per page)
+  const ITEMS_PER_PAGE = 20;
+  const [txPage, setTxPage] = useState(1);
+  const [customerPage, setCustomerPage] = useState(1);
+
+  useEffect(() => {
+    setTxPage(1);
+  }, [txFilter, txTypeFilter, searchQuery]);
+
+  useEffect(() => {
+    setCustomerPage(1);
+  }, [searchQuery]);
+
   // Customer Transaction History Modal State
   const [historyCustomer, setHistoryCustomer] = useState<Customer | null>(null);
 
@@ -537,19 +550,6 @@ export default function AdminPage() {
       c.accountNumber?.includes(q)
     );
   });
-
-  // Pagination State (20 items per page)
-  const ITEMS_PER_PAGE = 20;
-  const [txPage, setTxPage] = useState(1);
-  const [customerPage, setCustomerPage] = useState(1);
-
-  useEffect(() => {
-    setTxPage(1);
-  }, [txFilter, txTypeFilter, searchQuery]);
-
-  useEffect(() => {
-    setCustomerPage(1);
-  }, [searchQuery]);
 
   const totalTxPages = Math.max(1, Math.ceil(filteredTxs.length / ITEMS_PER_PAGE));
   const paginatedTxs = filteredTxs.slice(
