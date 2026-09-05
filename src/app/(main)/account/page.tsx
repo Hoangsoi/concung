@@ -79,6 +79,40 @@ const getTierBadge = (tierName?: string) => {
   };
 };
 
+const getCreditScoreStyle = (score: number = 100) => {
+  const clamped = Math.max(0, Math.min(100, score));
+  if (clamped < 40) {
+    return {
+      clamped,
+      color: "#ef4444", // Red
+      textColor: "#ef4444",
+      bgColor: "#fef2f2",
+    };
+  }
+  if (clamped < 70) {
+    return {
+      clamped,
+      color: "#f59e0b", // Amber
+      textColor: "#d97706",
+      bgColor: "#fffbe6",
+    };
+  }
+  if (clamped < 85) {
+    return {
+      clamped,
+      color: "#3b82f6", // Blue
+      textColor: "#2563eb",
+      bgColor: "#eff6ff",
+    };
+  }
+  return {
+    clamped,
+    color: "#10b981", // Emerald Green
+    textColor: "#059669",
+    bgColor: "#ecfdf5",
+  };
+};
+
 export default function AccountPage() {
   const [user, setUser] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -278,16 +312,37 @@ export default function AccountPage() {
       </section>
       <h3>Thông tin cá nhân</h3>
       <div className={styles.list}>
-        <div className={styles.row}>
-          <span className={styles.pinkIcon}>
-            <Star size={20} />
-          </span>
-          <div>
-            <label>ĐIỂM TÍN NHIỆM</label>
-            <strong className={styles.pink}>{user.creditScore ?? 100}/100 điểm</strong>
-          </div>
-          <span className={styles.track} aria-hidden="true" />
-        </div>
+        {(() => {
+          const creditStyle = getCreditScoreStyle(user.creditScore ?? 100);
+          return (
+            <div className={styles.row}>
+              <span
+                className={styles.pinkIcon}
+                style={{ backgroundColor: creditStyle.bgColor, color: creditStyle.textColor }}
+              >
+                <Star size={20} />
+              </span>
+              <div>
+                <label>ĐIỂM TÍN NHIỆM</label>
+                <strong style={{ color: creditStyle.textColor }}>
+                  {user.creditScore ?? 100}/100 điểm
+                </strong>
+              </div>
+              <div
+                className="w-16 h-3 bg-slate-200/80 rounded-full overflow-hidden p-0.5 border border-slate-300/60 shrink-0 ml-auto"
+                title={`Điểm tín nhiệm: ${user.creditScore ?? 100}/100 điểm`}
+              >
+                <div
+                  className="h-full rounded-full transition-all duration-500 shadow-sm"
+                  style={{
+                    width: `${Math.max(8, creditStyle.clamped)}%`,
+                    backgroundColor: creditStyle.color,
+                  }}
+                />
+              </div>
+            </div>
+          );
+        })()}
         <div className={styles.row}>
           <span className={styles.icon}>
             <Phone size={20} />
