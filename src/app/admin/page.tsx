@@ -964,7 +964,7 @@ export default function AdminPage() {
                             : "bg-red-500/10 text-red-400 border-red-500/30"
                         }`}>
                           <Star className="h-3 w-3 fill-current" />
-                          {c.creditScore ?? 100} điểm
+                          {c.creditScore ?? 100}/100 điểm
                         </span>
                       </td>
                       <td className="py-3.5 px-3 text-center font-mono font-bold text-emerald-400 text-sm border-r border-slate-800">

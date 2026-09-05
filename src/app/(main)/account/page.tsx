@@ -245,7 +245,7 @@ export default function AccountPage() {
           </span>
           <div>
             <label>ĐIỂM TÍN NHIỆM</label>
-            <strong className={styles.pink}>{user.creditScore ?? 100} điểm</strong>
+            <strong className={styles.pink}>{user.creditScore ?? 100}/100 điểm</strong>
           </div>
           <span className={styles.track} aria-hidden="true" />
         </div>
