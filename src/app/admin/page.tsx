@@ -538,6 +538,31 @@ export default function AdminPage() {
     );
   });
 
+  // Pagination State (20 items per page)
+  const ITEMS_PER_PAGE = 20;
+  const [txPage, setTxPage] = useState(1);
+  const [customerPage, setCustomerPage] = useState(1);
+
+  useEffect(() => {
+    setTxPage(1);
+  }, [txFilter, txTypeFilter, searchQuery]);
+
+  useEffect(() => {
+    setCustomerPage(1);
+  }, [searchQuery]);
+
+  const totalTxPages = Math.max(1, Math.ceil(filteredTxs.length / ITEMS_PER_PAGE));
+  const paginatedTxs = filteredTxs.slice(
+    (txPage - 1) * ITEMS_PER_PAGE,
+    txPage * ITEMS_PER_PAGE
+  );
+
+  const totalCustomerPages = Math.max(1, Math.ceil(filteredCustomers.length / ITEMS_PER_PAGE));
+  const paginatedCustomers = filteredCustomers.slice(
+    (customerPage - 1) * ITEMS_PER_PAGE,
+    customerPage * ITEMS_PER_PAGE
+  );
+
   const pendingCount = transactions.filter((t) => t.status === "pending").length;
 
   return (
@@ -756,14 +781,14 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800">
-                  {filteredTxs.length === 0 ? (
+                  {paginatedTxs.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="py-8 text-center text-slate-500">
                         Không tìm thấy lịch sử giao dịch nào
                       </td>
                     </tr>
                   ) : (
-                    filteredTxs.map((tx) => (
+                    paginatedTxs.map((tx) => (
                       <tr key={tx.id} className="hover:bg-slate-800/40 transition-colors">
                         <td className="py-3.5 px-4 text-center font-bold text-white border-r border-slate-800">#{tx.id}</td>
                         <td className="py-3.5 px-4 text-center border-r border-slate-800">
@@ -841,6 +866,43 @@ export default function AdminPage() {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Controls for Transactions */}
+            {filteredTxs.length > 0 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-slate-950 border-t border-slate-800 text-xs text-slate-400">
+                <div>
+                  Hiển thị từ{" "}
+                  <strong className="text-white">{(txPage - 1) * ITEMS_PER_PAGE + 1}</strong>{" "}
+                  đến{" "}
+                  <strong className="text-white">
+                    {Math.min(txPage * ITEMS_PER_PAGE, filteredTxs.length)}
+                  </strong>{" "}
+                  trên tổng số <strong className="text-rose-400">{filteredTxs.length}</strong> giao dịch
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setTxPage((p) => Math.max(1, p - 1))}
+                    disabled={txPage === 1}
+                    className="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed font-bold transition-colors cursor-pointer"
+                  >
+                    ← Trang trước
+                  </button>
+
+                  <span className="px-3 py-1 bg-slate-900 rounded-lg font-mono text-white font-bold border border-slate-800">
+                    Trang {txPage} / {totalTxPages}
+                  </span>
+
+                  <button
+                    onClick={() => setTxPage((p) => Math.min(totalTxPages, p + 1))}
+                    disabled={txPage >= totalTxPages}
+                    className="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed font-bold transition-colors cursor-pointer"
+                  >
+                    Trang sau →
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -866,14 +928,14 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
-                {filteredCustomers.length === 0 ? (
+                {paginatedCustomers.length === 0 ? (
                   <tr>
                     <td colSpan={11} className="py-8 text-center text-slate-500">
                       Chưa có khách hàng nào trong cơ sở dữ liệu
                     </td>
                   </tr>
                 ) : (
-                  filteredCustomers.map((c) => (
+                  paginatedCustomers.map((c) => (
                     <tr key={c.id} className="hover:bg-slate-800/40 transition-colors">
                       <td className="py-3.5 px-3 text-center font-bold text-white border-r border-slate-800">#KH-{c.id}</td>
                       <td className="py-3.5 px-3 text-center font-bold text-slate-100 border-r border-slate-800">{c.fullName}</td>
@@ -1017,6 +1079,43 @@ export default function AdminPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls for Customers */}
+          {filteredCustomers.length > 0 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 bg-slate-950 border-t border-slate-800 text-xs text-slate-400">
+              <div>
+                Hiển thị từ{" "}
+                <strong className="text-white">{(customerPage - 1) * ITEMS_PER_PAGE + 1}</strong>{" "}
+                đến{" "}
+                <strong className="text-white">
+                  {Math.min(customerPage * ITEMS_PER_PAGE, filteredCustomers.length)}
+                </strong>{" "}
+                trên tổng số <strong className="text-rose-400">{filteredCustomers.length}</strong> khách hàng
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCustomerPage((p) => Math.max(1, p - 1))}
+                  disabled={customerPage === 1}
+                  className="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed font-bold transition-colors cursor-pointer"
+                >
+                  ← Trang trước
+                </button>
+
+                <span className="px-3 py-1 bg-slate-900 rounded-lg font-mono text-white font-bold border border-slate-800">
+                  Trang {customerPage} / {totalCustomerPages}
+                </span>
+
+                <button
+                  onClick={() => setCustomerPage((p) => Math.min(totalCustomerPages, p + 1))}
+                  disabled={customerPage >= totalCustomerPages}
+                  className="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed font-bold transition-colors cursor-pointer"
+                >
+                  Trang sau →
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
