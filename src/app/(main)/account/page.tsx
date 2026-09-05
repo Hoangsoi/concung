@@ -89,9 +89,38 @@ export default function AccountPage() {
     void load();
     void loadSavedBank();
 
+    // 3-second background polling for live account info auto-sync
+    const intervalId = setInterval(() => {
+      void load();
+    }, 3000);
+
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel("concung_realtime");
+      channel.onmessage = (event) => {
+        if (event.data?.type === "REFRESH_WALLET") {
+          void load();
+          void loadSavedBank();
+        }
+      };
+    } catch {
+      // Fallback
+    }
+
+    const handleStorageEvent = (e: StorageEvent) => {
+      if (e.key === "wallet_updated") {
+        void load();
+        void loadSavedBank();
+      }
+    };
+
     window.addEventListener("bank-account-changed", loadSavedBank);
+    window.addEventListener("storage", handleStorageEvent);
     return () => {
+      clearInterval(intervalId);
       window.removeEventListener("bank-account-changed", loadSavedBank);
+      window.removeEventListener("storage", handleStorageEvent);
+      if (channel) channel.close();
     };
   }, []);
 

@@ -154,6 +154,7 @@ export default function AdminPage() {
         );
         setAddingMoneyCustomer(null);
         void loadAdminData();
+        notifyClientUpdate();
       } else {
         alert(data.error || "Cộng tiền thất bại");
       }
@@ -179,6 +180,7 @@ export default function AdminPage() {
         setCustomers((prev) =>
           prev.map((c) => (c.id === customerId ? { ...c, status } : c))
         );
+        notifyClientUpdate();
       } else {
         alert("Cập nhật trạng thái thất bại");
       }
@@ -242,6 +244,7 @@ export default function AdminPage() {
           )
         );
         setEditingCustomer(null);
+        notifyClientUpdate();
       } else {
         alert("Lỗi khi lưu thông tin khách hàng");
       }
@@ -255,7 +258,7 @@ export default function AdminPage() {
   // Check Admin Authentication on Load
   const checkAdminAuth = async () => {
     try {
-      const res = await fetch("/api/admin/login", { cache: "no-store" });
+      const res = await fetch("/api/admin/check", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         setIsAuthenticated(data.authenticated);
@@ -270,9 +273,66 @@ export default function AdminPage() {
     }
   };
 
+  const notifyClientUpdate = () => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("wallet_updated", String(Date.now()));
+        window.dispatchEvent(new Event("storage"));
+        const channel = new BroadcastChannel("concung_realtime");
+        channel.postMessage({ type: "REFRESH_WALLET" });
+        channel.close();
+      }
+    } catch {
+      // Ignore
+    }
+  };
+
   useEffect(() => {
     void checkAdminAuth();
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated !== true) return;
+
+    // 1. Initial load
+    void loadAdminData();
+
+    // 2. Setup 3-second background polling for real-time admin sync
+    const intervalId = setInterval(() => {
+      void loadAdminData();
+    }, 3000);
+
+    // 3. Setup BroadcastChannel and storage listeners for instant updates
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel("concung_realtime");
+      channel.onmessage = (event) => {
+        if (
+          event.data?.type === "REFRESH_ADMIN" ||
+          event.data?.type === "NEW_TRANSACTION" ||
+          event.data?.type === "NEW_USER"
+        ) {
+          void loadAdminData();
+        }
+      };
+    } catch {
+      // Fallback
+    }
+
+    const handleStorageEvent = (e: StorageEvent) => {
+      if (e.key === "admin_data_updated") {
+        void loadAdminData();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageEvent);
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener("storage", handleStorageEvent);
+      if (channel) channel.close();
+    };
+  }, [isAuthenticated]);
 
   const loadAdminData = async () => {
     setLoadingData(true);

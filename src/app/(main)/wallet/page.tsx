@@ -78,15 +78,54 @@ export default function WalletPage() {
     setLinkedBank(null);
   };
 
+  const notifyAdminUpdate = () => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("admin_data_updated", String(Date.now()));
+        window.dispatchEvent(new Event("storage"));
+        const channel = new BroadcastChannel("concung_realtime");
+        channel.postMessage({ type: "REFRESH_ADMIN" });
+        channel.close();
+      }
+    } catch {
+      // Ignore
+    }
+  };
+
   useEffect(() => {
     void loadWalletData();
     void loadLinkedBank();
 
+    // 3-second background polling for live balance auto-sync
+    const intervalId = setInterval(() => {
+      void loadWalletData();
+    }, 3000);
+
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel("concung_realtime");
+      channel.onmessage = (event) => {
+        if (event.data?.type === "REFRESH_WALLET") {
+          void loadWalletData();
+        }
+      };
+    } catch {
+      // Fallback
+    }
+
+    const handleStorageEvent = (e: StorageEvent) => {
+      if (e.key === "wallet_updated") {
+        void loadWalletData();
+      }
+    };
+
     window.addEventListener("bank-account-changed", loadLinkedBank);
-    window.addEventListener("storage", loadWalletData);
+    window.addEventListener("storage", handleStorageEvent);
     return () => {
+      clearInterval(intervalId);
       window.removeEventListener("bank-account-changed", loadLinkedBank);
-      window.removeEventListener("storage", loadWalletData);
+      window.removeEventListener("storage", handleStorageEvent);
+      if (channel) channel.close();
     };
   }, []);
 
@@ -131,6 +170,7 @@ export default function WalletPage() {
           });
         }
         void loadWalletData();
+        notifyAdminUpdate();
       } else {
         alert(data.error || "Rút tiền thất bại");
       }
