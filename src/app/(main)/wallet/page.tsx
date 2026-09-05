@@ -2,7 +2,19 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowDownToLine, ArrowUpFromLine, RefreshCcw, Activity, X, Wallet, ChevronRight, CheckCircle2, Landmark, Check } from "lucide-react";
+import {
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  RefreshCcw,
+  Activity,
+  X,
+  Wallet,
+  ChevronRight,
+  CheckCircle2,
+  Landmark,
+  Check,
+  AlertTriangle,
+} from "lucide-react";
 import { formatVND } from "@/lib/utils";
 import type { LinkedBank } from "../account/page";
 import styles from "./wallet.module.css";
@@ -15,8 +27,38 @@ export default function WalletPage() {
   const [amount, setAmount] = useState("");
   const [linkedBank, setLinkedBank] = useState<LinkedBank | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [withdrawSuccess, setWithdrawSuccess] = useState<{ amount: number; bank: string; acc: string } | null>(null);
+  const [withdrawSuccess, setWithdrawSuccess] = useState<{
+    amount: number;
+    bank: string;
+    acc: string;
+    remainingBalance: number;
+  } | null>(null);
+
+  // Wallet balances and stats
+  const [balance, setBalance] = useState(0);
+  const [totalDeposit, setTotalDeposit] = useState(0);
+  const [totalWithdraw, setTotalWithdraw] = useState(0);
+  const [pendingDeposit, setPendingDeposit] = useState(0);
+  const [txCount, setTxCount] = useState(0);
+
   const dialog = useRef<HTMLDialogElement>(null);
+
+  // Load wallet data from localStorage
+  const loadWalletData = () => {
+    try {
+      const savedWallet = localStorage.getItem("concung_wallet_data");
+      if (savedWallet) {
+        const parsed = JSON.parse(savedWallet);
+        setBalance(parsed.balance ?? 0);
+        setTotalDeposit(parsed.totalDeposit ?? 0);
+        setTotalWithdraw(parsed.totalWithdraw ?? 0);
+        setPendingDeposit(parsed.pendingDeposit ?? 0);
+        setTxCount(parsed.txCount ?? 0);
+      }
+    } catch {
+      // Default to 0
+    }
+  };
 
   const loadLinkedBank = async () => {
     try {
@@ -46,12 +88,14 @@ export default function WalletPage() {
   };
 
   useEffect(() => {
+    loadWalletData();
     void loadLinkedBank();
+
     window.addEventListener("bank-account-changed", loadLinkedBank);
-    window.addEventListener("storage", loadLinkedBank);
+    window.addEventListener("storage", loadWalletData);
     return () => {
       window.removeEventListener("bank-account-changed", loadLinkedBank);
-      window.removeEventListener("storage", loadLinkedBank);
+      window.removeEventListener("storage", loadWalletData);
     };
   }, []);
 
@@ -62,11 +106,12 @@ export default function WalletPage() {
     dialog.current?.showModal();
   }
 
-  // Calculate validity (no upper limit)
+  // Amount validation & balance check
   const numAmount = Number(amount);
   const isValidAmount = numAmount > 0;
   const isWithdraw = mode === "withdraw";
-  const canSubmit = isValidAmount && (!isWithdraw || Boolean(linkedBank));
+  const isBalanceInsufficient = isWithdraw && numAmount > balance;
+  const canSubmit = isValidAmount && !isBalanceInsufficient && (!isWithdraw || Boolean(linkedBank));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,11 +121,33 @@ export default function WalletPage() {
 
     setTimeout(() => {
       setIsSubmitting(false);
+
       if (isWithdraw && linkedBank) {
+        const newBalance = Math.max(0, balance - numAmount);
+        const newWithdraw = totalWithdraw + numAmount;
+        const newTxCount = txCount + 1;
+
+        setBalance(newBalance);
+        setTotalWithdraw(newWithdraw);
+        setTxCount(newTxCount);
+
+        // Save wallet state
+        localStorage.setItem(
+          "concung_wallet_data",
+          JSON.stringify({
+            balance: newBalance,
+            totalDeposit,
+            totalWithdraw: newWithdraw,
+            pendingDeposit,
+            txCount: newTxCount,
+          })
+        );
+
         setWithdrawSuccess({
           amount: numAmount,
           bank: linkedBank.bankName,
           acc: linkedBank.accountNumber,
+          remainingBalance: newBalance,
         });
       }
     }, 600);
@@ -91,9 +158,12 @@ export default function WalletPage() {
       <div className={dashboard.container}>
         <h1>Ví của tôi</h1>
 
+        {/* Balance Card */}
         <section className={dashboard.balanceCard} aria-label="Số dư ví">
           <p>Số dư ví</p>
-          <strong aria-label="Chưa có dữ liệu số dư">— <span>đ</span></strong>
+          <strong aria-label="Số dư hiện tại">
+            {formatVND(balance)}
+          </strong>
           <div className={dashboard.actions}>
             <button type="button" disabled>
               <ArrowDownToLine size={20} />Nạp tiền
@@ -104,27 +174,47 @@ export default function WalletPage() {
           </div>
         </section>
 
+        {/* Stats Grid */}
         <section aria-labelledby="wallet-stats-title">
           <h2 id="wallet-stats-title">Thống kê ví</h2>
           <div className={dashboard.stats}>
-            {[
-              { label: "TỔNG NẠP", icon: ArrowDownToLine, color: "green", money: true },
-              { label: "TỔNG RÚT", icon: ArrowUpFromLine, color: "red", money: true },
-              { label: "CHỜ NẠP", icon: RefreshCcw, color: "brown", money: true },
-              { label: "GIAO DỊCH", icon: Activity, color: "pink", money: false },
-            ].map((stat) => (
-              <div key={stat.label} className={dashboard.stat}>
-                <span className={`${dashboard.icon} ${dashboard[stat.color]}`}>
-                  <stat.icon size={20} strokeWidth={1.7} />
-                </span>
-                <p>{stat.label}</p>
-                <strong aria-label="Chưa có dữ liệu">—{stat.money ? " đ" : ""}</strong>
-              </div>
-            ))}
+            <div className={dashboard.stat}>
+              <span className={`${dashboard.icon} ${dashboard.green}`}>
+                <ArrowDownToLine size={20} strokeWidth={1.7} />
+              </span>
+              <p>TỔNG NẠP</p>
+              <strong>{formatVND(totalDeposit)}</strong>
+            </div>
+
+            <div className={dashboard.stat}>
+              <span className={`${dashboard.icon} ${dashboard.red}`}>
+                <ArrowUpFromLine size={20} strokeWidth={1.7} />
+              </span>
+              <p>TỔNG RÚT</p>
+              <strong>{formatVND(totalWithdraw)}</strong>
+            </div>
+
+            <div className={dashboard.stat}>
+              <span className={`${dashboard.icon} ${dashboard.brown}`}>
+                <RefreshCcw size={20} strokeWidth={1.7} />
+              </span>
+              <p>CHỜ NẠP</p>
+              <strong>{formatVND(pendingDeposit)}</strong>
+            </div>
+
+            <div className={dashboard.stat}>
+              <span className={`${dashboard.icon} ${dashboard.pink}`}>
+                <Activity size={20} strokeWidth={1.7} />
+              </span>
+              <p>GIAO DỊCH</p>
+              <strong>{txCount}</strong>
+            </div>
           </div>
-          <p className={dashboard.notice}>Chưa có dữ liệu ví. Dịch vụ thanh toán đang chờ kết nối.</p>
+
+          <p className={dashboard.notice}>Số dư ví và thống kê được tự động cập nhật sau mỗi giao dịch.</p>
         </section>
 
+        {/* Modal Dialog */}
         <dialog
           ref={dialog}
           className={dashboard.dialog}
@@ -156,6 +246,9 @@ export default function WalletPage() {
                     Số tiền <strong className="text-rose-600">{formatVND(withdrawSuccess.amount)}</strong> sẽ được chuyển về ngân hàng{" "}
                     <strong>{withdrawSuccess.bank}</strong> (STK: {withdrawSuccess.acc}) trong 24h.
                   </p>
+                  <p className="text-[11px] text-slate-500 pt-1">
+                    Số dư còn lại: <strong>{formatVND(withdrawSuccess.remainingBalance)}</strong>
+                  </p>
                 </div>
                 <button
                   onClick={() => dialog.current?.close()}
@@ -183,7 +276,19 @@ export default function WalletPage() {
                   <span>đ</span>
                 </div>
 
-                <small id="amount-hint">Không giới hạn số tiền giao dịch</small>
+                {/* Balance Insufficient Warning */}
+                {isBalanceInsufficient && (
+                  <div className="mt-2.5 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-bold flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 shrink-0 text-red-500" />
+                    <span>
+                      Số dư ví không đủ để rút tiền. (Số dư hiện tại: <strong>{formatVND(balance)}</strong>)
+                    </span>
+                  </div>
+                )}
+
+                <small id="amount-hint" className="mt-2 block">
+                  Số dư khả dụng: <strong className="text-slate-900 font-bold">{formatVND(balance)}</strong>
+                </small>
 
                 <div className={styles.presets}>
                   {[50000, 100000, 200000, 500000].map((value) => (
