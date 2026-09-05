@@ -181,7 +181,7 @@ export async function POST(request: Request) {
       `;
 
       await sql`
-        INSERT INTO wallet_transactions (user_id, user_name, user_phone, type, amount, bank_name, account_number, account_holder, status, note)
+        INSERT INTO wallet_transactions (user_id, user_name, user_phone, type, amount, bank_name, account_number, account_holder, status, note, created_at)
         VALUES (
           ${userId}, 
           ${user.full_name}, 
@@ -192,7 +192,8 @@ export async function POST(request: Request) {
           ${bank.account_number}, 
           ${bank.account_holder}, 
           'pending', 
-          'Rút tiền'
+          'Rút tiền',
+          ${new Date().toISOString()}
         );
       `;
 
