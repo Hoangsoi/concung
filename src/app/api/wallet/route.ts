@@ -27,28 +27,49 @@ export async function GET() {
       console.warn("Error fetching user balance in /api/wallet:", err);
     }
 
-    // 2. Fetch stats from wallet_transactions table
+    // 2. Fetch stats and transaction list from wallet_transactions table
     let totalDeposit = 0;
     let totalWithdraw = 0;
     let pendingDeposit = 0;
     let txCount = 0;
+    let transactions: any[] = [];
 
     try {
-      const stats = await sql`
-        SELECT 
-          COALESCE(SUM(CASE WHEN type = 'deposit' AND status = 'approved' THEN amount ELSE 0 END), 0) as "totalDeposit",
-          COALESCE(SUM(CASE WHEN type = 'withdraw' AND status = 'approved' THEN amount ELSE 0 END), 0) as "totalWithdraw",
-          COALESCE(SUM(CASE WHEN type = 'deposit' AND status = 'pending' THEN amount ELSE 0 END), 0) as "pendingDeposit",
-          COUNT(*) as "txCount"
-        FROM wallet_transactions
-        WHERE user_id = ${userId};
-      `;
+      const [stats, txList] = await Promise.all([
+        sql`
+          SELECT 
+            COALESCE(SUM(CASE WHEN type = 'deposit' AND status = 'approved' THEN amount ELSE 0 END), 0) as "totalDeposit",
+            COALESCE(SUM(CASE WHEN type = 'withdraw' AND status = 'approved' THEN amount ELSE 0 END), 0) as "totalWithdraw",
+            COALESCE(SUM(CASE WHEN type = 'deposit' AND status = 'pending' THEN amount ELSE 0 END), 0) as "pendingDeposit",
+            COUNT(*) as "txCount"
+          FROM wallet_transactions
+          WHERE user_id = ${userId};
+        `,
+        sql`
+          SELECT 
+            id,
+            user_id as "userId",
+            type,
+            amount,
+            status,
+            note,
+            bank_name as "bankName",
+            account_number as "accountNumber",
+            account_holder as "accountHolder",
+            created_at as "createdAt"
+          FROM wallet_transactions
+          WHERE user_id = ${userId}
+          ORDER BY id DESC;
+        `,
+      ]);
+
       if (stats.length > 0) {
         totalDeposit = Number(stats[0].totalDeposit || 0);
         totalWithdraw = Number(stats[0].totalWithdraw || 0);
         pendingDeposit = Number(stats[0].pendingDeposit || 0);
         txCount = Number(stats[0].txCount || 0);
       }
+      transactions = txList || [];
     } catch (err) {
       console.warn("Error fetching wallet stats in /api/wallet:", err);
     }
@@ -60,6 +81,7 @@ export async function GET() {
         totalWithdraw,
         pendingDeposit,
         txCount,
+        transactions,
       },
       { headers: { "Cache-Control": "no-store" } }
     );
