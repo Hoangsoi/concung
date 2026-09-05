@@ -725,51 +725,57 @@ export default function AdminPage() {
                         {new Date(c.createdAt).toLocaleDateString("vi-VN")}
                       </td>
                       <td className="py-3.5 px-4 text-center">
-                        <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                          <button
-                            onClick={() => handleOpenEditModal(c)}
-                            className="bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1"
-                            title="Đổi thông tin"
-                          >
-                            <Pencil className="h-3 w-3" /> Đổi TT
-                          </button>
+                        {c.phone === "admin" || c.phone?.toLowerCase().includes("admin") || c.fullName?.toLowerCase().includes("admin") ? (
+                          <span className="bg-slate-800 text-slate-400 border border-slate-700/80 px-3 py-1 rounded-lg font-bold text-[11px] inline-flex items-center gap-1.5 shadow-inner">
+                            <ShieldCheck className="h-3.5 w-3.5 text-rose-400" /> Admin Hệ Thống
+                          </span>
+                        ) : (
+                          <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                            <button
+                              onClick={() => handleOpenEditModal(c)}
+                              className="bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1"
+                              title="Đổi thông tin"
+                            >
+                              <Pencil className="h-3 w-3" /> Đổi TT
+                            </button>
 
-                          {c.status === "frozen" ? (
-                            <button
-                              onClick={() => handleUpdateCustomerStatus(c.id, "active")}
-                              className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1"
-                              title="Mở đóng băng"
-                            >
-                              <Unlock className="h-3 w-3" /> Mở Băng
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleUpdateCustomerStatus(c.id, "frozen")}
-                              className="bg-cyan-600/20 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-cyan-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1"
-                              title="Đóng băng tài khoản"
-                            >
-                              <Snowflake className="h-3 w-3" /> Đóng Băng
-                            </button>
-                          )}
+                            {c.status === "frozen" ? (
+                              <button
+                                onClick={() => handleUpdateCustomerStatus(c.id, "active")}
+                                className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1"
+                                title="Mở đóng băng"
+                              >
+                                <Unlock className="h-3 w-3" /> Mở Băng
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleUpdateCustomerStatus(c.id, "frozen")}
+                                className="bg-cyan-600/20 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-cyan-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1"
+                                title="Đóng băng tài khoản"
+                              >
+                                <Snowflake className="h-3 w-3" /> Đóng Băng
+                              </button>
+                            )}
 
-                          {c.status === "locked" ? (
-                            <button
-                              onClick={() => handleUpdateCustomerStatus(c.id, "active")}
-                              className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1"
-                              title="Mở khóa tài khoản"
-                            >
-                              <Unlock className="h-3 w-3" /> Mở Khóa
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleUpdateCustomerStatus(c.id, "locked")}
-                              className="bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1"
-                              title="Khóa tài khoản"
-                            >
-                              <Lock className="h-3 w-3" /> Khóa
-                            </button>
-                          )}
-                        </div>
+                            {c.status === "locked" ? (
+                              <button
+                                onClick={() => handleUpdateCustomerStatus(c.id, "active")}
+                                className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1"
+                                title="Mở khóa tài khoản"
+                              >
+                                <Unlock className="h-3 w-3" /> Mở Khóa
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleUpdateCustomerStatus(c.id, "locked")}
+                                className="bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1"
+                                title="Khóa tài khoản"
+                              >
+                                <Lock className="h-3 w-3" /> Khóa
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))

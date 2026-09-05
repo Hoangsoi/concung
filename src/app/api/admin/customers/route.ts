@@ -76,6 +76,16 @@ export async function POST(request: Request) {
 
     await ensureUserStatusColumn();
 
+    // Prevent modifying admin account
+    try {
+      const targetUser = await sql`SELECT phone FROM users WHERE id = ${customerId} LIMIT 1;`;
+      if (targetUser.length > 0 && (targetUser[0].phone === "admin" || targetUser[0].phone?.toLowerCase().includes("admin"))) {
+        return NextResponse.json({ error: "Không thể chỉnh sửa hoặc khóa tài khoản Admin!" }, { status: 400 });
+      }
+    } catch {
+      // ignore
+    }
+
     if (action === "updateStatus" && status) {
       try {
         await sql`
