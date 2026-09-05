@@ -143,9 +143,9 @@ export default function CSKHPage() {
         </div>
       </div>
 
-      {/* FAQ & Form Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 border border-slate-200">
+      {/* FAQ Section */}
+      <div className="space-y-4">
+        <Card className="border border-slate-200">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <HelpCircle className="h-5 w-5 text-[#F52862]" />
@@ -172,47 +172,6 @@ export default function CSKHPage() {
                 </div>
               );
             })}
-          </CardContent>
-        </Card>
-
-        {/* Contact Form */}
-        <Card className="border border-slate-200">
-          <CardHeader>
-            <CardTitle className="text-base">Gửi Yêu Cầu Hỗ Trợ</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {submitted ? (
-              <div className="bg-emerald-50 text-emerald-800 p-4 rounded-xl text-center space-y-2 border border-emerald-200">
-                <p className="font-bold text-xs">Gửi thành công!</p>
-                <p className="text-[11px]">Đội ngũ CSKH Con Cưng sẽ liên hệ lại với bạn trong vòng 30 phút.</p>
-                <Button size="sm" variant="outline" onClick={() => setSubmitted(false)} className="text-xs">
-                  Gửi yêu cầu khác
-                </Button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-700">Họ và tên</label>
-                  <Input required placeholder="Ví dụ: Nguyễn Văn A" className="h-9 text-xs" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-700">Số điện thoại</label>
-                  <Input required type="tel" placeholder="0988xxxxxx" className="h-9 text-xs" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-700">Nội dung cần hỗ trợ</label>
-                  <textarea
-                    required
-                    rows={3}
-                    placeholder="Mô tả thắc mắc hoặc sự cố của bạn..."
-                    className="w-full rounded-md border border-slate-300 p-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#F52862]"
-                  />
-                </div>
-                <Button type="submit" className="w-full bg-[#F52862] hover:bg-[#d91d51] text-white text-xs font-bold h-9">
-                  <Send className="h-3.5 w-3.5 mr-1" /> Gửi Yêu Cầu
-                </Button>
-              </form>
-            )}
           </CardContent>
         </Card>
       </div>
