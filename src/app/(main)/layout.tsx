@@ -17,7 +17,7 @@ export default function MainLayout({
     return <main>{children}</main>;
   }
 
-  if (pathname === "/wallet" || pathname === "/account" || pathname === "/cskh") {
+  if (pathname === "/wallet" || pathname === "/account" || pathname === "/cskh" || pathname === "/history") {
     return <><main className="min-h-screen pb-24">{children}</main><MobileNav /></>;
   }
 
