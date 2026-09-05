@@ -48,11 +48,11 @@ export function TopBar() {
   return (
     <div className={styles.bar}>
       <div className={styles.container}>
-        <div className={styles.hotline}>
-          <span>Mua hàng và CSKH:</span>
-          <a href="tel:18006609">1800 6609</a>
-          <img src="/images/header/free-call.png" alt="Gọi miễn phí" />
-        </div>
+        <Link href="/cskh" className={styles.hotline}>
+          <span className="font-bold text-[#ff379b] hover:underline cursor-pointer">
+            Liên hệ CSKH
+          </span>
+        </Link>
 
         <Link href="/stores" className={styles.store}>
           <img src="/images/header/store.png" alt="" />
