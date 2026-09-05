@@ -509,13 +509,6 @@ export default function AdminPage() {
             <span>Làm mới</span>
           </Button>
 
-          <Link href="/">
-            <Button variant="outline" size="sm" className="bg-slate-900 border-slate-800 text-slate-300 hover:text-white">
-              <Home className="h-4 w-4" />
-              <span>Trang chủ</span>
-            </Button>
-          </Link>
-
           <Button
             onClick={handleAdminLogout}
             size="sm"
