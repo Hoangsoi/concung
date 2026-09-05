@@ -11,17 +11,19 @@ export async function GET() {
       return NextResponse.json({ error: "Chưa đăng nhập" }, { status: 401 });
     }
 
-    // 1. Fetch user balance from Neon
+    // 1. Fetch user balance & status from Neon
     let balance = 0;
+    let status = "active";
     try {
       const userRows = await sql`
-        SELECT COALESCE(balance, 0) as balance 
+        SELECT COALESCE(balance, 0) as balance, COALESCE(status, 'active') as status
         FROM users 
         WHERE id = ${userId} 
         LIMIT 1;
       `;
       if (userRows.length > 0) {
         balance = Number(userRows[0].balance || 0);
+        status = userRows[0].status || "active";
       }
     } catch (err) {
       console.warn("Error fetching user balance in /api/wallet:", err);
@@ -77,6 +79,7 @@ export async function GET() {
     return NextResponse.json(
       {
         balance,
+        status,
         totalDeposit,
         totalWithdraw,
         pendingDeposit,
@@ -106,9 +109,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Số tiền rút phải lớn hơn 0" }, { status: 400 });
       }
 
-      // Check current user balance & details
+      // Check current user balance, status & details
       const users = await sql`
-        SELECT full_name, phone, COALESCE(balance, 0) as balance 
+        SELECT full_name, phone, COALESCE(balance, 0) as balance, COALESCE(status, 'active') as status 
         FROM users 
         WHERE id = ${userId} 
         LIMIT 1;
@@ -118,6 +121,21 @@ export async function POST(request: Request) {
       }
 
       const user = users[0];
+
+      if (user.status === "frozen") {
+        return NextResponse.json(
+          { error: "Tài khoản của bạn đang bị đóng băng. Không thể thực hiện lệnh rút tiền. Vui lòng liên hệ Admin để được hỗ trợ." },
+          { status: 403 }
+        );
+      }
+
+      if (user.status === "locked") {
+        return NextResponse.json(
+          { error: "Tài khoản của bạn đã bị khóa. Không thể thực hiện giao dịch." },
+          { status: 403 }
+        );
+      }
+
       const currentBalance = Number(user.balance || 0);
       if (withdrawAmount > currentBalance) {
         return NextResponse.json({ error: "Số dư trong ví không đủ để rút tiền." }, { status: 400 });

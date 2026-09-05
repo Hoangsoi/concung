@@ -36,6 +36,7 @@ export default function WalletPage() {
 
   // Wallet balances and stats
   const [balance, setBalance] = useState(0);
+  const [userStatus, setUserStatus] = useState<"active" | "frozen" | "locked">("active");
   const [totalDeposit, setTotalDeposit] = useState(0);
   const [totalWithdraw, setTotalWithdraw] = useState(0);
   const [pendingDeposit, setPendingDeposit] = useState(0);
@@ -50,6 +51,7 @@ export default function WalletPage() {
       if (res.ok) {
         const data = await res.json();
         setBalance(data.balance ?? 0);
+        setUserStatus(data.status || "active");
         setTotalDeposit(data.totalDeposit ?? 0);
         setTotalWithdraw(data.totalWithdraw ?? 0);
         setPendingDeposit(data.pendingDeposit ?? 0);
@@ -130,6 +132,10 @@ export default function WalletPage() {
   }, []);
 
   function choose(kind: Kind) {
+    if (kind === "withdraw" && userStatus === "frozen") {
+      alert("Tài khoản của bạn đang bị đóng băng. Không thể thực hiện lệnh rút tiền. Vui lòng liên hệ Admin để được hỗ trợ.");
+      return;
+    }
     setMode(kind);
     setAmount("");
     setWithdrawSuccess(null);
@@ -141,7 +147,7 @@ export default function WalletPage() {
   const isValidAmount = numAmount > 0;
   const isWithdraw = mode === "withdraw";
   const isBalanceInsufficient = isWithdraw && numAmount > balance;
-  const canSubmit = isValidAmount && !isBalanceInsufficient && (!isWithdraw || Boolean(linkedBank));
+  const canSubmit = isValidAmount && !isBalanceInsufficient && (!isWithdraw || Boolean(linkedBank)) && userStatus !== "frozen";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,6 +192,18 @@ export default function WalletPage() {
       <div className={dashboard.container}>
         <h1>Ví của tôi</h1>
 
+        {userStatus === "frozen" && (
+          <div className="bg-cyan-50 border border-cyan-300 rounded-2xl p-4 text-cyan-900 font-semibold text-xs flex items-center gap-3 shadow-sm mb-4">
+            <div className="h-8 w-8 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600 text-lg shrink-0">
+              ❄️
+            </div>
+            <div>
+              <div className="font-bold text-sm text-cyan-950">Tài khoản của bạn đang bị đóng băng</div>
+              <p className="text-cyan-800 text-[11px] mt-0.5">Chức năng rút tiền tạm thời bị vô hiệu hóa. Vui lòng liên hệ Admin hệ thống để được hỗ trợ mở băng.</p>
+            </div>
+          </div>
+        )}
+
         {/* Balance Card */}
         <section className={dashboard.balanceCard} aria-label="Số dư ví">
           <p>Số dư ví</p>
@@ -196,8 +214,11 @@ export default function WalletPage() {
             <button type="button" disabled>
               <ArrowDownToLine size={20} />Nạp tiền
             </button>
-            <button onClick={() => choose("withdraw")}>
-              <ArrowUpFromLine size={20} />Rút tiền
+            <button 
+              onClick={() => choose("withdraw")}
+              className={userStatus === "frozen" ? "opacity-60 cursor-not-allowed" : ""}
+            >
+              <ArrowUpFromLine size={20} />Rút tiền {userStatus === "frozen" && "(Đã đóng băng)"}
             </button>
           </div>
         </section>

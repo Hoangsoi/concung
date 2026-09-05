@@ -44,13 +44,7 @@ export async function POST(request: Request) {
         }
         if (user.status === "locked") {
           return NextResponse.json(
-            { error: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ bộ phận hỗ trợ." },
-            { status: 403 }
-          );
-        }
-        if (user.status === "frozen") {
-          return NextResponse.json(
-            { error: "Tài khoản của bạn đang bị đóng băng. Vui lòng liên hệ bộ phận hỗ trợ." },
+            { error: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin để được hỗ trợ mở khóa." },
             { status: 403 }
           );
         }
