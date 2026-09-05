@@ -122,16 +122,20 @@ export function WalletHistory() {
       ) : (
         <ul className={styles.transactions}>
           {filteredTxs.map((tx) => (
-            <li key={tx.id} className="hover:bg-slate-50/50 transition-colors rounded-xl px-2">
-              <div className={tx.type === "deposit" ? styles.inIcon : styles.outIcon}>
+            <li key={tx.id} className="flex items-center gap-3 py-3.5 px-2 hover:bg-slate-50/60 transition-colors rounded-xl border-b border-slate-100/80 last:border-0">
+              <div className={`w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center ${
+                tx.type === "deposit"
+                  ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                  : "bg-rose-50 text-rose-500 border border-rose-100"
+              }`}>
                 {tx.type === "deposit" ? (
                   <ArrowDownToLine size={20} />
                 ) : (
                   <ArrowUpFromLine size={20} />
                 )}
               </div>
-              <div>
-                <div className="font-bold text-slate-800 text-sm">
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-slate-800 text-sm truncate">
                   {tx.type === "withdraw" ? "Rút tiền" : (tx.note || "Nạp tiền")}
                 </div>
                 <div className="text-[11px] text-slate-400 mt-0.5 flex flex-wrap items-center gap-2">
@@ -154,9 +158,11 @@ export function WalletHistory() {
                   )}
                 </div>
               </div>
-              <b className={`font-mono text-base ${tx.type === "deposit" ? styles.inAmount : "text-slate-800"}`}>
-                {tx.type === "deposit" ? "+" : "-"}{formatVND(Number(tx.amount))}
-              </b>
+              <div className="text-right shrink-0">
+                <b className={`font-mono text-base font-extrabold ${tx.type === "deposit" ? "text-emerald-600" : "text-slate-800"}`}>
+                  {tx.type === "deposit" ? "+" : "-"}{formatVND(Number(tx.amount))}
+                </b>
+              </div>
             </li>
           ))}
         </ul>
