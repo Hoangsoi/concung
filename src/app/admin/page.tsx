@@ -18,6 +18,10 @@ import {
   RefreshCcw,
   Search,
   Landmark,
+  Snowflake,
+  Unlock,
+  Pencil,
+  X,
 } from "lucide-react";
 import { formatVND } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -26,6 +30,7 @@ interface Customer {
   id: number;
   fullName: string;
   phone: string;
+  status?: "active" | "frozen" | "locked";
   createdAt: string;
   bankName?: string;
   accountNumber?: string;
@@ -64,6 +69,96 @@ export default function AdminPage() {
   const [txFilter, setTxFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingData, setLoadingData] = useState(false);
+
+  // Customer Edit & Status Modal State
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [editForm, setEditForm] = useState({
+    fullName: "",
+    phone: "",
+    bankName: "",
+    accountNumber: "",
+    accountHolder: "",
+  });
+  const [isSubmittingCustomer, setIsSubmittingCustomer] = useState(false);
+
+  const handleUpdateCustomerStatus = async (customerId: number, status: "active" | "frozen" | "locked") => {
+    try {
+      const res = await fetch("/api/admin/customers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "updateStatus",
+          customerId,
+          status,
+        }),
+      });
+      if (res.ok) {
+        setCustomers((prev) =>
+          prev.map((c) => (c.id === customerId ? { ...c, status } : c))
+        );
+      } else {
+        alert("Cập nhật trạng thái thất bại");
+      }
+    } catch {
+      alert("Lỗi kết nối khi cập nhật trạng thái");
+    }
+  };
+
+  const handleOpenEditModal = (c: Customer) => {
+    setEditingCustomer(c);
+    setEditForm({
+      fullName: c.fullName || "",
+      phone: c.phone || "",
+      bankName: c.bankName || "",
+      accountNumber: c.accountNumber || "",
+      accountHolder: c.accountHolder || "",
+    });
+  };
+
+  const handleSaveCustomerInfo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCustomer) return;
+    setIsSubmittingCustomer(true);
+    try {
+      const res = await fetch("/api/admin/customers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "updateInfo",
+          customerId: editingCustomer.id,
+          fullName: editForm.fullName,
+          phone: editForm.phone,
+          bankName: editForm.bankName,
+          accountNumber: editForm.accountNumber,
+          accountHolder: editForm.accountHolder,
+        }),
+      });
+
+      if (res.ok) {
+        setCustomers((prev) =>
+          prev.map((c) =>
+            c.id === editingCustomer.id
+              ? {
+                  ...c,
+                  fullName: editForm.fullName,
+                  phone: editForm.phone,
+                  bankName: editForm.bankName,
+                  accountNumber: editForm.accountNumber,
+                  accountHolder: editForm.accountHolder,
+                }
+              : c
+          )
+        );
+        setEditingCustomer(null);
+      } else {
+        alert("Lỗi khi lưu thông tin khách hàng");
+      }
+    } catch {
+      alert("Lỗi kết nối khi lưu thông tin");
+    } finally {
+      setIsSubmittingCustomer(false);
+    }
+  };
 
   // Check Admin Authentication on Load
   const checkAdminAuth = async () => {
@@ -577,13 +672,15 @@ export default function AdminPage() {
                   <th className="py-3.5 px-4 text-center border-r border-slate-800">Họ và Tên</th>
                   <th className="py-3.5 px-4 text-center border-r border-slate-800">Số Điện Thoại</th>
                   <th className="py-3.5 px-4 text-center border-r border-slate-800">Tài Khoản Ngân Hàng Liên Kết</th>
-                  <th className="py-3.5 px-4 text-center">Ngày Đăng Ký</th>
+                  <th className="py-3.5 px-4 text-center border-r border-slate-800">Trạng Thái</th>
+                  <th className="py-3.5 px-4 text-center border-r border-slate-800">Ngày Đăng Ký</th>
+                  <th className="py-3.5 px-4 text-center">Hành Động</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
                 {filteredCustomers.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-slate-500">
+                    <td colSpan={7} className="py-8 text-center text-slate-500">
                       Chưa có khách hàng nào trong cơ sở dữ liệu
                     </td>
                   </tr>
@@ -607,14 +704,175 @@ export default function AdminPage() {
                           <span className="text-slate-500 italic">Chưa liên kết ngân hàng</span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-center text-slate-400 text-[11px]">
+                      <td className="py-3.5 px-4 text-center border-r border-slate-800">
+                        {(!c.status || c.status === "active") && (
+                          <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1">
+                            <CheckCircle2 className="h-3 w-3" /> Bình Thường
+                          </span>
+                        )}
+                        {c.status === "frozen" && (
+                          <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1">
+                            <Snowflake className="h-3 w-3" /> Đóng Băng
+                          </span>
+                        )}
+                        {c.status === "locked" && (
+                          <span className="bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1">
+                            <Lock className="h-3 w-3" /> Bị Khóa
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-center text-slate-400 text-[11px] border-r border-slate-800">
                         {new Date(c.createdAt).toLocaleDateString("vi-VN")}
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                          <button
+                            onClick={() => handleOpenEditModal(c)}
+                            className="bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1"
+                            title="Đổi thông tin"
+                          >
+                            <Pencil className="h-3 w-3" /> Đổi TT
+                          </button>
+
+                          {c.status === "frozen" ? (
+                            <button
+                              onClick={() => handleUpdateCustomerStatus(c.id, "active")}
+                              className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1"
+                              title="Mở đóng băng"
+                            >
+                              <Unlock className="h-3 w-3" /> Mở Băng
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleUpdateCustomerStatus(c.id, "frozen")}
+                              className="bg-cyan-600/20 hover:bg-cyan-600 text-cyan-300 hover:text-white border border-cyan-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1"
+                              title="Đóng băng tài khoản"
+                            >
+                              <Snowflake className="h-3 w-3" /> Đóng Băng
+                            </button>
+                          )}
+
+                          {c.status === "locked" ? (
+                            <button
+                              onClick={() => handleUpdateCustomerStatus(c.id, "active")}
+                              className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1"
+                              title="Mở khóa tài khoản"
+                            >
+                              <Unlock className="h-3 w-3" /> Mở Khóa
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleUpdateCustomerStatus(c.id, "locked")}
+                              className="bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1"
+                              title="Khóa tài khoản"
+                            >
+                              <Lock className="h-3 w-3" /> Khóa
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT CUSTOMER MODAL */}
+      {editingCustomer && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl space-y-4 p-6">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Pencil className="h-4 w-4 text-rose-400" />
+                Sửa Thông Tin Khách Hàng #{editingCustomer.id}
+              </h3>
+              <button
+                onClick={() => setEditingCustomer(null)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveCustomerInfo} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Họ và Tên</label>
+                <input
+                  type="text"
+                  value={editForm.fullName}
+                  onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Số Điện Thoại</label>
+                <input
+                  type="text"
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
+                  required
+                />
+              </div>
+
+              <div className="border-t border-slate-800 pt-3 space-y-3">
+                <h4 className="text-xs font-bold text-rose-400">Thông Tin Ngân Hàng</h4>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Tên Ngân Hàng</label>
+                  <input
+                    type="text"
+                    placeholder="VD: MBBank, Vietcombank, Techcombank..."
+                    value={editForm.bankName}
+                    onChange={(e) => setEditForm({ ...editForm, bankName: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Số Tài Khoản</label>
+                  <input
+                    type="text"
+                    placeholder="Nhập số tài khoản"
+                    value={editForm.accountNumber}
+                    onChange={(e) => setEditForm({ ...editForm, accountNumber: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Chủ Tài Khoản</label>
+                  <input
+                    type="text"
+                    placeholder="Nhập tên chủ tài khoản (Viết hoa)"
+                    value={editForm.accountHolder}
+                    onChange={(e) => setEditForm({ ...editForm, accountHolder: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 border-t border-slate-800 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setEditingCustomer(null)}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingCustomer}
+                  className="px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  {isSubmittingCustomer ? "Đang lưu..." : "Lưu Cập Nhật"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

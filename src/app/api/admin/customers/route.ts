@@ -14,6 +14,16 @@ async function verifyAdminAuth() {
   }
 }
 
+async function ensureUserStatusColumn() {
+  try {
+    await sql`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'active';
+    `;
+  } catch (err) {
+    // Column might already exist
+  }
+}
+
 export async function GET() {
   const isAuth = await verifyAdminAuth();
   if (!isAuth) {
@@ -21,6 +31,8 @@ export async function GET() {
   }
 
   try {
+    await ensureUserStatusColumn();
+
     // 1. Fetch registered users from Neon PostgreSQL
     let users: any[] = [];
     try {
@@ -29,6 +41,7 @@ export async function GET() {
           u.id, 
           u.full_name as "fullName", 
           u.phone, 
+          COALESCE(u.status, 'active') as "status",
           u.created_at as "createdAt",
           b.bank_name as "bankName",
           b.account_number as "accountNumber",
@@ -38,47 +51,85 @@ export async function GET() {
         ORDER BY u.id DESC;
       `;
     } catch (err) {
-      console.warn("Error fetching users from Neon, using default table check:", err);
-    }
-
-    if (users.length === 0) {
-      // Demo mock data if database has no registered users yet
-      users = [
-        {
-          id: 1,
-          fullName: "Nguyễn Thị Mai",
-          phone: "0988999999",
-          createdAt: new Date().toISOString(),
-          bankName: "Vietcombank",
-          accountNumber: "9988112233",
-          accountHolder: "NGUYEN THI MAI",
-          balance: 15000000,
-        },
-        {
-          id: 2,
-          fullName: "Trần Thị Tuyết",
-          phone: "0901234567",
-          createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-          bankName: "MBBank",
-          accountNumber: "0333888999",
-          accountHolder: "TRAN THI TUYET",
-          balance: 5200000,
-        },
-        {
-          id: 3,
-          fullName: "Lê Hoàng Nam",
-          phone: "0912345678",
-          createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-          bankName: "Techcombank",
-          accountNumber: "190388445566",
-          accountHolder: "LE HOANG NAM",
-          balance: 0,
-        },
-      ];
+      console.warn("Error fetching users from Neon:", err);
     }
 
     return NextResponse.json({ customers: users });
   } catch (error) {
     return NextResponse.json({ error: "Lỗi tải danh sách khách hàng" }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  const isAuth = await verifyAdminAuth();
+  if (!isAuth) {
+    return NextResponse.json({ error: "Không có quyền truy cập trang Quản trị" }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const { action, customerId, status, fullName, phone, bankName, accountNumber, accountHolder } = body;
+
+    if (!customerId) {
+      return NextResponse.json({ error: "Thiếu ID khách hàng" }, { status: 400 });
+    }
+
+    await ensureUserStatusColumn();
+
+    if (action === "updateStatus" && status) {
+      try {
+        await sql`
+          UPDATE users 
+          SET status = ${status} 
+          WHERE id = ${customerId};
+        `;
+      } catch (err) {
+        console.warn("Error updating user status in Neon:", err);
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `Đã cập nhật trạng thái tài khoản #${customerId} thành ${
+          status === "frozen" ? "ĐÓNG BĂNG" : status === "locked" ? "BỊ KHÓA" : "BÌNH THƯỜNG"
+        }!`,
+      });
+    }
+
+    if (action === "updateInfo") {
+      try {
+        if (fullName || phone) {
+          await sql`
+            UPDATE users 
+            SET full_name = COALESCE(${fullName}, full_name),
+                phone = COALESCE(${phone}, phone)
+            WHERE id = ${customerId};
+          `;
+        }
+
+        if (bankName && accountNumber && accountHolder) {
+          await sql`
+            INSERT INTO bank_accounts (user_id, bank_name, account_number, account_holder)
+            VALUES (${customerId}, ${bankName.trim()}, ${accountNumber.trim()}, ${accountHolder.trim().toUpperCase()})
+            ON CONFLICT (user_id) 
+            DO UPDATE SET 
+              bank_name = EXCLUDED.bank_name,
+              account_number = EXCLUDED.account_number,
+              account_holder = EXCLUDED.account_holder,
+              updated_at = CURRENT_TIMESTAMP;
+          `;
+        }
+      } catch (err) {
+        console.warn("Error updating customer info in Neon:", err);
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `Đã cập nhật thông tin khách hàng #${customerId} thành công!`,
+      });
+    }
+
+    return NextResponse.json({ error: "Hành động không hợp lệ" }, { status: 400 });
+  } catch (error) {
+    return NextResponse.json({ error: "Lỗi cập nhật thông tin khách hàng" }, { status: 500 });
   }
 }

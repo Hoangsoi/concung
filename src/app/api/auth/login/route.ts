@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
       // Query user by phone
       const users = await sql`
-        SELECT id, full_name, phone, password FROM users WHERE phone = ${cleanPhone} LIMIT 1;
+        SELECT id, full_name, phone, password, COALESCE(status, 'active') as status FROM users WHERE phone = ${cleanPhone} LIMIT 1;
       `;
 
       if (users.length > 0) {
@@ -40,6 +40,18 @@ export async function POST(request: Request) {
           return NextResponse.json(
             { error: "Mật khẩu không chính xác. Ba mẹ vui lòng kiểm tra lại." },
             { status: 400 }
+          );
+        }
+        if (user.status === "locked") {
+          return NextResponse.json(
+            { error: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ bộ phận hỗ trợ." },
+            { status: 403 }
+          );
+        }
+        if (user.status === "frozen") {
+          return NextResponse.json(
+            { error: "Tài khoản của bạn đang bị đóng băng. Vui lòng liên hệ bộ phận hỗ trợ." },
+            { status: 403 }
           );
         }
         return attachSession(
