@@ -10,6 +10,7 @@ import {
   X,
   MapPin,
   User,
+  Wallet,
 } from "lucide-react";
 import { BRAND_NAME, MAIN_NAV_ITEMS } from "@/lib/constants";
 import { useCart } from "@/hooks/useCart";
@@ -91,6 +92,17 @@ export function Header() {
                 </span>
               </div>
               <span className="text-[14px] font-medium mt-0.5 text-[#777777]">Giỏ hàng</span>
+            </Link>
+
+            {/* Ví Shortcut */}
+            <Link
+              href="/wallet"
+              className="flex flex-col items-center justify-center text-[#333333] hover:text-[#ED1B68] transition-colors group relative"
+            >
+              <div className="relative">
+                <Wallet className="h-7 w-7 text-[#888888] stroke-[1.5] group-hover:text-[#ED1B68]" />
+              </div>
+              <span className="text-[14px] font-medium mt-0.5 text-[#777777]">Ví</span>
             </Link>
 
             {/* Ưu đãi Shortcut with Speech Bubble Badge */}
