@@ -59,15 +59,20 @@ export default function AccountPage() {
   const dialog = useRef<HTMLDialogElement>(null);
   const router = useRouter();
 
-  async function load() {
-    setLoading(true); setError("");
+  async function load(isSilent = false) {
+    if (!isSilent) setLoading(true);
+    setError("");
     try {
       const response = await fetch("/api/account", { cache: "no-store" });
       if (response.status === 401) { setGuest(true); setUser(null); return; }
       if (!response.ok) throw new Error();
       const data = await response.json(); setUser(data.user); setGuest(false);
-    } catch { setError("Không tải được thông tin từ hệ thống. Ba mẹ vui lòng thử lại."); }
-    finally { setLoading(false); }
+    } catch {
+      if (!isSilent) setError("Không tải được thông tin từ hệ thống. Ba mẹ vui lòng thử lại.");
+    }
+    finally {
+      if (!isSilent) setLoading(false);
+    }
   }
 
   // Load saved bank account from Neon DB
@@ -95,12 +100,12 @@ export default function AccountPage() {
   };
 
   useEffect(() => {
-    void load();
+    void load(false);
     void loadSavedBank();
 
-    // 3-second background polling for live account info auto-sync
+    // 3-second silent background polling for live account info auto-sync
     const intervalId = setInterval(() => {
-      void load();
+      void load(true);
     }, 3000);
 
     let channel: BroadcastChannel | null = null;
@@ -108,7 +113,7 @@ export default function AccountPage() {
       channel = new BroadcastChannel("concung_realtime");
       channel.onmessage = (event) => {
         if (event.data?.type === "REFRESH_WALLET") {
-          void load();
+          void load(true);
           void loadSavedBank();
         }
       };
@@ -118,7 +123,7 @@ export default function AccountPage() {
 
     const handleStorageEvent = (e: StorageEvent) => {
       if (e.key === "wallet_updated") {
-        void load();
+        void load(true);
         void loadSavedBank();
       }
     };
@@ -306,7 +311,7 @@ export default function AccountPage() {
         {loggingOut ? "Đang đăng xuất…" : "Đăng xuất"}
       </button>
     </>}
-    {error && <div role="alert" className={styles.message}><p>{error}</p><button onClick={load}>Thử lại</button></div>}
+    {error && <div role="alert" className={styles.message}><p>{error}</p><button onClick={() => load(false)}>Thử lại</button></div>}
 
     {/* Bank Account Modal Dialog */}
     <dialog ref={dialog} className={styles.dialog} aria-labelledby="bank-title">

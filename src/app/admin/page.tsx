@@ -295,14 +295,14 @@ export default function AdminPage() {
     if (isAuthenticated !== true) return;
 
     // 1. Initial load
-    void loadAdminData();
+    void loadAdminData(false);
 
-    // 2. Setup 3-second background polling for real-time admin sync
+    // 2. Setup 3-second background polling for real-time admin sync (silent refresh)
     const intervalId = setInterval(() => {
-      void loadAdminData();
+      void loadAdminData(true);
     }, 3000);
 
-    // 3. Setup BroadcastChannel and storage listeners for instant updates
+    // 3. Setup BroadcastChannel and storage listeners for instant updates (silent refresh)
     let channel: BroadcastChannel | null = null;
     try {
       channel = new BroadcastChannel("concung_realtime");
@@ -312,7 +312,7 @@ export default function AdminPage() {
           event.data?.type === "NEW_TRANSACTION" ||
           event.data?.type === "NEW_USER"
         ) {
-          void loadAdminData();
+          void loadAdminData(true);
         }
       };
     } catch {
@@ -321,7 +321,7 @@ export default function AdminPage() {
 
     const handleStorageEvent = (e: StorageEvent) => {
       if (e.key === "admin_data_updated") {
-        void loadAdminData();
+        void loadAdminData(true);
       }
     };
 
@@ -334,8 +334,8 @@ export default function AdminPage() {
     };
   }, [isAuthenticated]);
 
-  const loadAdminData = async () => {
-    setLoadingData(true);
+  const loadAdminData = async (isSilent = false) => {
+    if (!isSilent) setLoadingData(true);
     try {
       const [custRes, txRes] = await Promise.all([
         fetch("/api/admin/customers", { cache: "no-store" }),
@@ -354,7 +354,7 @@ export default function AdminPage() {
     } catch (err) {
       console.warn("Failed to load admin data:", err);
     } finally {
-      setLoadingData(false);
+      if (!isSilent) setLoadingData(false);
     }
   };
 
@@ -585,7 +585,7 @@ export default function AdminPage() {
 
         <div className="flex items-center gap-3">
           <Button
-            onClick={loadAdminData}
+            onClick={() => loadAdminData(false)}
             variant="outline"
             size="sm"
             className="bg-slate-900 border-slate-800 text-slate-300 hover:text-white"
