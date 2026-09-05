@@ -1,0 +1,42 @@
+@font-face { font-family: "For You Roboto"; src: url("/images/bestsellers/Roboto-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "For You Roboto"; src: url("/images/bestsellers/Roboto-Medium.ttf") format("truetype"); font-weight: 500; font-display: swap; }
+.grid { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 10px; font-family: "For You Roboto",Arial,sans-serif; }
+.card { min-width: 0; background: white; border-radius: 14px; padding: 10px; color: #000; }
+.artwork { position: relative; height: 170px; display: flex; align-items: center; isolation: isolate; }
+.frame { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+.picture { width: 100%; height: 170px; display: flex; align-items: center; justify-content: center; }
+.picture img { max-width: 100%; max-height: 170px; object-fit: contain; }
+.frame + .picture img { max-height: 136px; }
+.asidePicture { width: calc(100% - 55px); }
+.gift { position: absolute; right: 0; width: 50px; top: 65px; z-index: 3; }
+.gift > img:not(.giftLabel) { width: 50px; height: 50px; object-fit: contain; }
+.giftLabel { position: absolute; top: -22px; width: 50px; height: 18px; object-fit: contain; }
+.artwork:has(.half) .gift, .artwork:has(.halfMilk) .gift { top: 24px; }
+.dots { display: flex; gap: 4px; justify-content: center; height: 12px; align-items: center; }
+.dots i { width: 10px; height: 4px; background: #ff379b; border-radius: 4px; }
+.dots i:last-child { width: 5px; background: #ddd; }
+.diaper { position: absolute; right: 5px; top: 14px; width: 52px; padding: 4px; background: linear-gradient(#10c986,#0bbd7c); color: white; border-radius: 12px; text-align: center; z-index: 3; font: 15px/17px "Times New Roman",serif; }
+.diaper img { width: 35px; height: 24px; margin: 0 auto; }
+.diaper small { display: block; font-size: 10px; line-height: 13px; }
+.diaper > span { display: block; border-top: 1px solid white; margin-top: 3px; }
+.quantity { white-space: pre-line; border-top: 1px solid white; margin-top: 5px; padding-top: 4px; font-size: 13px; line-height: 15px; }
+.half { top: auto; bottom: 5px; border-radius: 12px 12px 0 0; }
+.milk { position: absolute; right: 5px; width: 52px; padding: 4px; background: #3783ff; color: white; text-align: center; border-radius: 28px; z-index: 3; font: 14px/15px "Times New Roman",serif; white-space: pre-line; }
+.milk > div { background: white; color: #3783ff; border-radius: 50%; min-height: 42px; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; }
+.halfMilk { bottom: 5px; border-radius: 12px 12px 0 0; }
+.halfMilk > div { min-height: 24px; border-radius: 8px; }
+.card h3 { margin: 10px 0 8px; height: 36px; font-size: 14px; line-height: 18px; font-weight: 400; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.rating { display: flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 12px; line-height: 14px; color: #718096; }
+.stars { flex-shrink: 0; width: 65px; height: 14px; background: url('/images/bestsellers/start_active.svg') repeat-x left center; }
+.bottom { display: flex; gap: 5px; align-items: center; min-height: 36px; }
+.price { font-size: 18px; font-weight: 500; white-space: nowrap; }
+.discount { font-size: 12px; color: #ff379b; border: 1px solid #ff379b; border-radius: 8px; line-height: 14px; white-space: nowrap; }
+.bottom button { margin-left: auto; border: 0; width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; background: #f3f3f3; color: #888; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.card a:focus-visible, .bottom button:focus-visible { outline: 2px solid #ff379b; }
+@media (max-width: 767px) { .grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+.promotion { background: linear-gradient(145deg,white 70%,#ffc6f5); position: relative; }
+.promotion .picture { width: 100%; }
+.promotion .picture img { max-width: 70%; max-height: 125px; }
+.promoGift { position: absolute; width: 50px; height: 18px; object-fit: contain; right: 0; top: 55px; }
+.promoCondition { display: table; background: #ff8c17; border-radius: 10px; color: white; padding: 1px 5px; font-size: 10px; line-height: 14px; font-weight: 500; }
+.promotion::after { content: "Free"; position: absolute; right: 12px; bottom: 12px; font-size: 20px; font-weight: 500; color: #ffffffb3; pointer-events: none; }

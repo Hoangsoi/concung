@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "name": "Tã quần Bobby size XXL, 60 miếng (giao bao bì ngẫu nhiên)",
+    "image": "/images/san-qua/reference-1.webp",
+    "source": "https://cdn1.concung.com/2025/03/68659-1743150425-trans.webp",
+    "gift": "/images/san-qua/gift-1.webp",
+    "giftSource": "https://cdn1.concung.com/2024/05/65897-110143-large_mobile/qt-bobby-khan-uot-bobby-care-80-mieng-khong-huong.webp",
+    "href": "https://concung.com/bim-ta-khuyen-mai/ta-quan-bobby-size-xxl-60-mieng-6-mieng-68659.html",
+    "price": 366000,
+    "discount": 13.1
+  },
+  {
+    "id": 2,
+    "name": "Sữa GrowPLUS+ Đỏ 2+ 1.5kg (Từ 2 tuổi) (giao bao bì ngẫu nhiên)",
+    "image": "/images/san-qua/reference-2.webp",
+    "source": "https://cdn1.concung.com/2025/10/67424-1761796131-trans.webp",
+    "gift": "/images/san-qua/gift-2.webp",
+    "giftSource": "https://cdn1.concung.com/2026/08/79373-140444-large_mobile/qua-tang-gio-nap-nho-plus-chuong-trinh-sua-bot-nutifood.webp",
+    "href": "https://concung.com/sua-bot/sua-growplus-do-2-tuoi-1-5kg-67424.html",
+    "price": 615000,
+    "discount": 0
+  },
+  {
+    "id": 3,
+    "name": "Tã quần Bobby size L, 70 miếng (giao bao bì ngẫu nhiên)",
+    "image": "/images/san-qua/reference-3.webp",
+    "source": "https://cdn1.concung.com/2025/03/68661-1743151560-trans.webp",
+    "gift": "/images/san-qua/gift-3.webp",
+    "giftSource": "https://cdn1.concung.com/2024/05/65897-110143-large_mobile/qt-bobby-khan-uot-bobby-care-80-mieng-khong-huong.webp",
+    "href": "https://concung.com/bim-ta-khuyen-mai/ta-quan-bobby-size-l-70-mieng-6-mieng-68661.html",
+    "price": 366000,
+    "discount": 13.1
+  },
+  {
+    "id": 4,
+    "name": "Sữa Alphagen Premium Formulation Total Care Growing Up Formula 800g (từ 24 tháng trở lên)",
+    "image": "/images/san-qua/reference-4.webp",
+    "source": "https://cdn1.concung.com/2025/07/71959-1752229274-trans.webp",
+    "gift": "/images/san-qua/gift-4.webp",
+    "giftSource": "https://cdn1.concung.com/2026/05/77747-137495-large_mobile/qt-cc-sua-bot-alphagen-do-choi-leu-o-to.webp",
+    "href": "https://concung.com/sua-bot/sua-alphagen-premium-formulation-total-care-growing-up-formula-800g-tu-24-thang-tro-len-71959.html",
+    "price": 525000,
+    "discount": 0
+  },
+  {
+    "id": 5,
+    "name": "Tã Quần Animo Siêu Mềm Thoáng (M, 50 miếng)",
+    "image": "/images/san-qua/reference-5.webp",
+    "source": "https://cdn1.concung.com/2025/09/72993-1757875809-trans.webp",
+    "gift": "/images/san-qua/gift-5.webp",
+    "giftSource": "https://cdn1.concung.com/2026/08/79347-140284-large_mobile/khan-giay-lua-hop-animo-2-lop-cho-be-va-gia-dinh-180-to.webp",
+    "href": "https://concung.com/bim-ta-khuyen-mai/ta-quan-animo-sieu-mem-thoang-m-50-mieng-72993.html",
+    "price": 229000,
+    "discount": 0
+  }
+]

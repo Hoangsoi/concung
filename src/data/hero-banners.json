@@ -1,0 +1,44 @@
+[
+  {
+    "id": 0,
+    "image": "/images/hero/banner-0.webp",
+    "source": "https://cdn1.concung.com/img/adds/2026/01/1767581823-web-home-7-.png",
+    "title": "New user T1 - HOME",
+    "href": "https://concung.com/landingpages-new-user.html?itm_source=home&itm_medium=list-home-position-1&itm_campaign=new-user-t1-home-29996&itm_content=1&cc_source=banner&cc_medium=home-list-home-position-1&cc_campaign=new-user-t1-home-29996&cc_content=1&itm_source=home&itm_medium=list-home-position-1&itm_campaign=new-user-t1-home-29996&itm_content=1&cc_source=banner&cc_medium=home-list-home-position-1&cc_campaign=new-user-t1-home-29996&cc_content=1"
+  },
+  {
+    "id": 1,
+    "image": "/images/hero/banner-1.webp",
+    "source": "https://cdn1.concung.com/img/adds/2026/08/st-1787736225-3521.webp",
+    "title": "Sales Campaign Tháng 9: Tã sữa giảm đến 30%",
+    "href": "https://concung.com/landingpages-chuong-trinh-uu-dai.html?id_section=msts&itm_source=home&itm_medium=list-home-position-1&itm_campaign=sales-campaign-thang-9-ta-sua-giam-den-30-34126&itm_content=3&cc_source=banner&cc_medium=home-list-home-position-1&cc_campaign=sales-campaign-thang-9-ta-sua-giam-den-30-34126&cc_content=3"
+  },
+  {
+    "id": 2,
+    "image": "/images/hero/banner-2.webp",
+    "source": "https://cdn1.concung.com/img/adds/2026/08/st-1787735453-7777.webp",
+    "title": "Sữa Thùng -40% CP T9",
+    "href": "https://concung.com/landingpages-sua-thung-qua-to.html?itm_source=home&itm_medium=list-home-position-1&itm_campaign=sua-thung-40-cp-t9-34123&itm_content=4&cc_source=banner&cc_medium=home-list-home-position-1&cc_campaign=sua-thung-40-cp-t9-34123&cc_content=4"
+  },
+  {
+    "id": 3,
+    "image": "/images/hero/banner-3.webp",
+    "source": "https://cdn1.concung.com/img/adds/2026/08/st-1787798772-2581.webp",
+    "title": "Mega brand campaign Abbott",
+    "href": "https://concung.com/809-thuong-hieu-similac-101586-sua-bot.html?filter=901-1184&itm_source=home&itm_medium=list-home-position-1&itm_campaign=mega-brand-campaign-abbott-34159&itm_content=6&cc_source=banner&cc_medium=home-list-home-position-1&cc_campaign=mega-brand-campaign-abbott-34159&cc_content=6"
+  },
+  {
+    "id": 4,
+    "image": "/images/hero/banner-4.webp",
+    "source": "https://cdn1.concung.com/img/adds/2026/08/st-1787736801-2058.webp",
+    "title": "Brand Campaign: TÃ & VỆ SINH ANIMO",
+    "href": "https://concung.com/?itm_source=home&itm_medium=list-home-position-1&itm_campaign=brand-campaign-ta-ve-sinh-animo-34130&itm_content=6&cc_source=banner&cc_medium=home-list-home-position-1&cc_campaign=brand-campaign-ta-ve-sinh-animo-34130&cc_content=6"
+  },
+  {
+    "id": 5,
+    "image": "/images/hero/banner-5.webp",
+    "source": "https://cdn1.concung.com/img/product-thumbnails/2026/08/1787728990-a1baaf544262aa905b9c03381073dedb-WEB-HOME-HUGGIES_FREE_SENSE.webp",
+    "title": "Huggies Free Sense",
+    "href": "https://concung.com/?itm_source=home&itm_medium=list-home-position-1&itm_campaign=huggies-free-sense-&itm_content=1&cc_source=banner&cc_medium=home-list-home-position-1&cc_campaign=huggies-free-sense-&cc_content=1&itm_source=home&itm_medium=list-home-position-1&itm_campaign=huggies-free-sense-34095&itm_content=7&cc_source=banner&cc_medium=home-list-home-position-1&cc_campaign=huggies-free-sense-34095&cc_content=7"
+  }
+]

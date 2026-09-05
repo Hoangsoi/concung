@@ -1,0 +1,24 @@
+@font-face { font-family: "Pink Roboto"; src: url("/images/bestsellers/Roboto-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Pink Roboto"; src: url("/images/bestsellers/Roboto-Medium.ttf") format("truetype"); font-weight: 500 700; font-display: swap; }
+.section { min-width: 0; font-family: "Pink Roboto", Arial, sans-serif; }
+.heading { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 14px; }
+.heading h2 { margin: 0; font-size: 34px; line-height: 40px; font-weight: 500; letter-spacing: 6px; color: #ff379b; }
+.heading a { display: inline-flex; align-items: center; font-size: 16px; color: #ff379b; }
+.grid { display: grid; grid-template-columns: 630fr 335fr; gap: 15px; }
+.featured { position: relative; aspect-ratio: 630 / 400; min-width: 0; }
+.card { display: block; position: relative; overflow: hidden; border-radius: 12px; color: white; }
+.card > img { display: block; width: 100%; height: 100%; object-fit: fill; }
+.slide { position: absolute; inset: 0; visibility: hidden; opacity: 0; pointer-events: none; }
+.active { visibility: visible; opacity: 1; pointer-events: auto; }
+.caption { position: absolute; bottom: 0; left: 0; right: 0; min-height: 120px; padding: 60px 15px 14px; display: flex; align-items: flex-end; background: linear-gradient(to top, #171314eb 18%, #171314a6 45%, transparent); }
+.caption h3 { margin: 0; font-size: 18px; line-height: 26px; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.right { display: grid; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 16px; min-height: 0; min-width: 0; }
+.right .card { min-height: 0; min-width: 0; }
+.right .card > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.right .caption { min-height: 65px; padding: 16px 15px 10px; }
+.right .caption h3 { line-height: 20px; }
+.dots { position: absolute; bottom: 82px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 2; }
+.dots button { width: 12px; height: 12px; border: 0; border-radius: 8px; background: #ddd; padding: 0; cursor: pointer; }
+.dots .selected { width: 24px; background: #ff379b; border: 1px solid white; }
+.section a:focus-visible, .dots button:focus-visible { outline: 2px solid #ff379b; outline-offset: -2px; }
+@media (max-width: 640px) { .grid { grid-template-columns: 1fr; } .right { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto; gap: 12px; } .right .card { aspect-ratio: 335 / 192; } .right .caption { padding: 12px 8px 6px; } .right .caption h3 { font-size: 12px; line-height: 15px; } .caption h3 { font-size: 15px; line-height: 20px; } .heading h2 { font-size: 30px; } .dots { bottom: 72px; } }

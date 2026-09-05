@@ -1,0 +1,17 @@
+.bar { height: 40px; background: #fff4fc; color: #34465a; font-size: 14px; line-height: 18px; }
+.container { max-width: 1200px; width: 100%; height: 100%; padding: 0 12px; margin: 0 auto; display: grid; grid-template-columns: 378px 272px minmax(0,1fr) auto; align-items: center; }
+.hotline, .store, .address, .login { display: flex; align-items: center; white-space: nowrap; }
+.hotline { gap: 4px; }
+.hotline a, .store strong { color: #ff379b; font-weight: 700; }
+.hotline img { width: auto; height: 18px; }
+.store img { width: 19px; height: 19px; object-fit: contain; }
+.store strong { margin-left: 2px; }
+.address { gap: 4px; min-width: 0; }
+.address > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.clock { position: relative; width: 20px; height: 22px; flex-shrink: 0; color: #ffa800; font-size: 25px; line-height: 22px; }
+.clock small { position: absolute; right: -1px; bottom: -1px; color: #2581c5; background: #fff4fc; font-size: 10px; font-style: italic; line-height: 12px; }
+.login { gap: 5px; color: #67686c; }
+.login img { width: 21px; height: 20px; object-fit: contain; }
+.container a:focus-visible { outline: 2px solid #ff379b; outline-offset: 3px; }
+@media (min-width: 768px) and (max-width: 1100px) { .container { grid-template-columns: 31% 22% minmax(0,1fr) auto; column-gap: 8px; font-size: 12px; } }
+@media (max-width: 767px) { .bar { display: none; } }

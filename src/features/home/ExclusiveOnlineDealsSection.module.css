@@ -1,0 +1,19 @@
+@font-face { font-family: "Exclusive ConCung"; src: url("/images/bestsellers/ConCung-Font.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Exclusive Roboto"; src: url("/images/bestsellers/Roboto-Regular.ttf") format("truetype"); font-display: swap; }
+.section { position: relative; overflow: hidden; min-width: 0; padding: 24px 20px 20px; border-radius: 12px; background: white; }
+.heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px; }
+.heading h2 { margin: 0; font-family: "Exclusive ConCung", sans-serif; font-size: 24px; line-height: 24px; font-weight: 400; color: #404040; }
+.heading a { display: inline-flex; align-items: center; font-family: "Exclusive Roboto", Arial, sans-serif; font-size: 18px; line-height: 22px; color: #ff379b; }
+.track { display: flex; gap: 30px; padding-right: 28px; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
+.track::-webkit-scrollbar { display: none; }
+.group { flex: 0 0 398px; height: 248px; border-radius: 20px; overflow: hidden; background-repeat: no-repeat; background-size: 100% 100%; text-decoration: none; }
+.products { display: grid; grid-template-columns: repeat(2, 184px); gap: 10px; padding: 10px 10px 0; }
+.product { display: flex; align-items: center; justify-content: center; width: 184px; height: 184px; background: white; border-radius: 8px; }
+.product img { width: auto; height: auto; max-width: 170px; max-height: 175px; object-fit: contain; border-radius: 8px; }
+.caption { height: 54px; display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; font-family: "Exclusive ConCung", sans-serif; font-size: 22px; line-height: 26px; }
+.caption img { width: 24px; height: 24px; }
+.arrow { position: absolute; top: 182px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 2px solid #ffdef3; border-radius: 50%; background: #fffffff2; color: #ff86d2; cursor: pointer; }
+.arrow:disabled { color: #dedede; border-color: #f5f5f5; cursor: default; }
+.previous { left: 4px; } .next { right: 7px; }
+.group:focus-visible, .arrow:focus-visible, .heading a:focus-visible { outline: 2px solid #ff379b; outline-offset: -2px; }
+@media (max-width: 640px) { .section { padding-left: 15px; padding-right: 15px; } .heading h2 { font-size: 22px; } .heading a { font-size: 14px; } .group { flex-basis: 320px; height: 204px; } .products { grid-template-columns: repeat(2, 145px); } .product { width: 145px; height: 145px; } .product img { max-width: 135px; max-height: 140px; } .caption { height: 49px; font-size: 18px; } .arrow { top: 160px; } }

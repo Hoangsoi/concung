@@ -1,0 +1,128 @@
+[
+  {
+    "id": 0,
+    "title": "Tìm\nSiêu Thị",
+    "icon": "/images/services/reference-0.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/tim_sieu_thi_2.png",
+    "href": "https://concung.com/miniapp-tim-sieu-thi-gan-nha.html"
+  },
+  {
+    "id": 1,
+    "title": "Gọi\nCSKH",
+    "icon": "/images/services/reference-1.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/cskh.png",
+    "href": "https://concung.com/miniapp-omical.html"
+  },
+  {
+    "id": 2,
+    "title": "Pink\nGPT",
+    "icon": "/images/services/reference-2.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/pink_gpt.png",
+    "href": "https://concung.com/chat-ai.html"
+  },
+  {
+    "id": 3,
+    "title": "Thông Tin\nThai Kỳ",
+    "icon": "/images/services/reference-3.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/thong_tin_thai_ky.png",
+    "href": "https://concung.com/landingpages-me-bau.html?app=2"
+  },
+  {
+    "id": 4,
+    "title": "Bảo Hiểm\nSức Khỏe",
+    "icon": "/images/services/reference-4.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/bao_hiem_suc_khoe.png",
+    "href": "https://concung.com/landingpages-landingpages-the-suc-khoe-con-cung.html"
+  },
+  {
+    "id": 5,
+    "title": "Nhà Thuốc\nGần Nhà",
+    "icon": "/images/services/reference-5.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/nha_thuoc.png",
+    "href": "https://concung.com/miniapp-nha-thuoc-gan-nha.html"
+  },
+  {
+    "id": 6,
+    "title": "Ưu Đãi\nHội Viên",
+    "icon": "/images/services/reference-6.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/pink.png",
+    "href": "https://concung.com/danh-sach-goi-hoi-vien.html?app=2"
+  },
+  {
+    "id": 7,
+    "title": "Live Stream\nSăn Sale",
+    "icon": "/images/services/reference-7.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/app_live_4.png",
+    "href": "https://concung.com/miniapp-livestream.html"
+  },
+  {
+    "id": 8,
+    "title": "Xem\nHóa Đơn",
+    "icon": "/images/services/reference-8.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/xem_phieu_thanh_toan.png",
+    "href": "https://concung.com/miniapp-ebill.html"
+  },
+  {
+    "id": 9,
+    "title": "Chọn\nMua Lại",
+    "icon": "/images/services/reference-9.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/repurchase.png",
+    "href": "https://concung.com/danh-sach-don-hang.html"
+  },
+  {
+    "id": 10,
+    "title": "Voucher\nGiảm Giá",
+    "icon": "/images/services/reference-10.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/icon_voucher.png",
+    "href": "https://concung.com/landingpages-chuong-trinh-uu-dai.html"
+  },
+  {
+    "id": 11,
+    "title": "Tiền\nTich Lũy",
+    "icon": "/images/services/reference-11.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/tien_tich_luy.png",
+    "href": "https://concung.com/miniapp-diem-tich-luy.html"
+  },
+  {
+    "id": 12,
+    "title": "Thẻ\nƯu Đãi",
+    "icon": "/images/services/reference-12.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/the_thanh_vien.png",
+    "href": "https://concung.com/miniapp-goi-uu-dai.html"
+  },
+  {
+    "id": 13,
+    "title": "VieON\nGiải Trí",
+    "icon": "/images/services/reference-13.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/app_vieon.png",
+    "href": "https://concung.com/miniapp-vieon.html"
+  },
+  {
+    "id": 14,
+    "title": "Ưu Đãi\nVIP",
+    "icon": "/images/services/reference-14.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/uu_dai_vip.png",
+    "href": "https://concung.com/miniapp-nhung-web-vip.html"
+  },
+  {
+    "id": 15,
+    "title": "Genetica\nGiải Mã Gen",
+    "icon": "/images/services/reference-15.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/app_genetica.png",
+    "href": "https://concung.com/miniapp-genetica.html"
+  },
+  {
+    "id": 16,
+    "title": "Moon&Sheep\nNgủ Ngon",
+    "icon": "/images/services/reference-16.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/moon_sheep.png",
+    "href": "https://app.moonsheep.vn/?link=https://app.moonsheep.vn/mos&apn=concung.com.ccapp.moonsheep&isi=1596696650&ibi=concung.com.ccapp"
+  },
+  {
+    "id": 17,
+    "title": "Tạp Chí\nPINK",
+    "icon": "/images/services/reference-17.png",
+    "source": "https://cdn1.concung.com/img/res/img_label/tap_chi_pink.png",
+    "href": "https://concung.com/miniapp-tap-chi.html"
+  }
+]

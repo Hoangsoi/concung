@@ -1,0 +1,18 @@
+@font-face { font-family: "Services ConCung"; src: url("/images/bestsellers/ConCung-Font.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "Services Roboto"; src: url("/images/bestsellers/Roboto-Regular.ttf") format("truetype"); font-display: swap; }
+.section { position: relative; min-width: 0; overflow: hidden; padding: 20px 20px 28px; border-radius: 16px; background: #fff; }
+.section h2 { margin: 0 0 22px; font-family: "Services ConCung", sans-serif; font-size: 22px; line-height: 24px; font-weight: 400; color: #404040; }
+.track { display: flex; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; padding-left: 15px; }
+.track::-webkit-scrollbar { display: none; }
+.item { flex: 0 0 110px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; color: #000; text-decoration: none; }
+.artwork { position: relative; width: 70px; height: 70px; }
+.artwork img { width: 70px; height: 70px; object-fit: contain; }
+.badge { position: absolute; top: 0; right: 8px; border-radius: 7px; padding: 2px 4px; background: #ffb600; color: white; font-family: Arial, sans-serif; font-size: 10px; line-height: 12px; }
+.label { margin-top: 6px; margin-left: 2px; white-space: pre-line; font-family: "Services Roboto", Arial, sans-serif; font-size: 15px; line-height: 18px; font-weight: 400; }
+.item:nth-child(2) .label { margin-left: 9px; }
+.item:nth-child(3) .label { margin-left: 21px; }
+.arrow { position: absolute; top: 104px; width: 32px; height: 32px; border: 1px solid #ffd4e9; border-radius: 50%; background: #fffffff2; color: #ff379b; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 2px 3px #0000000c; }
+.previous { left: 6px; } .next { right: 6px; }
+.arrow:disabled { color: #718096; border-color: #e2e8f0; cursor: default; }
+.item:focus-visible, .arrow:focus-visible { outline: 2px solid #ff379b; outline-offset: -2px; }
+@media (max-width: 640px) { .section { padding-left: 15px; padding-right: 15px; } .track { padding-left: 5px; } .item { flex-basis: 100px; } }
