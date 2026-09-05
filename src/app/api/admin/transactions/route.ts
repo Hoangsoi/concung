@@ -33,33 +33,58 @@ async function ensureTransactionsTable() {
   `;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const isAuth = await verifyAdminAuth();
   if (!isAuth) {
     return NextResponse.json({ error: "Không có quyền truy cập trang Quản trị" }, { status: 401 });
   }
 
   try {
+    const { searchParams } = new URL(request.url);
+    const userIdParam = searchParams.get("userId");
+    const userId = userIdParam ? Number(userIdParam) : null;
+
     let transactions: any[] = [];
     try {
       await ensureTransactionsTable();
-      transactions = await sql`
-        SELECT 
-          id, 
-          user_id as "userId",
-          user_name as "userName",
-          user_phone as "userPhone",
-          type,
-          amount,
-          bank_name as "bankName",
-          account_number as "accountNumber",
-          account_holder as "accountHolder",
-          status,
-          note,
-          created_at as "createdAt"
-        FROM wallet_transactions
-        ORDER BY id DESC;
-      `;
+      if (userId) {
+        transactions = await sql`
+          SELECT 
+            id, 
+            user_id as "userId",
+            user_name as "userName",
+            user_phone as "userPhone",
+            type,
+            amount,
+            bank_name as "bankName",
+            account_number as "accountNumber",
+            account_holder as "accountHolder",
+            status,
+            note,
+            created_at as "createdAt"
+          FROM wallet_transactions
+          WHERE user_id = ${userId}
+          ORDER BY id DESC;
+        `;
+      } else {
+        transactions = await sql`
+          SELECT 
+            id, 
+            user_id as "userId",
+            user_name as "userName",
+            user_phone as "userPhone",
+            type,
+            amount,
+            bank_name as "bankName",
+            account_number as "accountNumber",
+            account_holder as "accountHolder",
+            status,
+            note,
+            created_at as "createdAt"
+          FROM wallet_transactions
+          ORDER BY id DESC;
+        `;
+      }
     } catch (err) {
       console.warn("Error querying transactions table, using fallback demo transactions:", err);
     }

@@ -28,6 +28,8 @@ import {
   Award,
   Star,
   ShieldAlert,
+  History,
+  FileText,
 } from "lucide-react";
 import { formatVND } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -76,8 +78,12 @@ export default function AdminPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [txFilter, setTxFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
+  const [txTypeFilter, setTxTypeFilter] = useState<"all" | "deposit" | "withdraw">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingData, setLoadingData] = useState(false);
+
+  // Customer Transaction History Modal State
+  const [historyCustomer, setHistoryCustomer] = useState<Customer | null>(null);
 
   // Customer Edit & Status Modal State
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
@@ -444,13 +450,15 @@ export default function AdminPage() {
   // Filter transactions
   const filteredTxs = transactions.filter((tx) => {
     if (txFilter !== "all" && tx.status !== txFilter) return false;
+    if (txTypeFilter !== "all" && tx.type !== txTypeFilter) return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       return (
         tx.userName?.toLowerCase().includes(q) ||
         tx.userPhone?.includes(q) ||
         tx.bankName?.toLowerCase().includes(q) ||
-        tx.accountNumber?.includes(q)
+        tx.accountNumber?.includes(q) ||
+        tx.note?.toLowerCase().includes(q)
       );
     }
     return true;
@@ -624,12 +632,13 @@ export default function AdminPage() {
       {activeTab === "transactions" && (
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900 p-3 rounded-2xl border border-slate-800">
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className="text-xs text-slate-400 font-semibold mr-1">Trạng thái:</span>
               {(["all", "pending", "approved", "rejected"] as const).map((filterVal) => (
                 <button
                   key={filterVal}
                   onClick={() => setTxFilter(filterVal)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                     txFilter === filterVal
                       ? "bg-rose-500 text-white"
                       : "bg-slate-800 text-slate-400 hover:text-white"
@@ -641,6 +650,40 @@ export default function AdminPage() {
                   {filterVal === "rejected" && "Từ chối"}
                 </button>
               ))}
+
+              <div className="h-4 w-px bg-slate-800 mx-1 hidden sm:block"></div>
+
+              <span className="text-xs text-slate-400 font-semibold mr-1">Loại GD:</span>
+              <button
+                onClick={() => setTxTypeFilter("all")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                  txTypeFilter === "all"
+                    ? "bg-rose-500 text-white"
+                    : "bg-slate-800 text-slate-400 hover:text-white"
+                }`}
+              >
+                Tất cả
+              </button>
+              <button
+                onClick={() => setTxTypeFilter("deposit")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                  txTypeFilter === "deposit"
+                    ? "bg-emerald-600 text-white"
+                    : "bg-slate-800 text-slate-400 hover:text-white"
+                }`}
+              >
+                Nạp Tiền
+              </button>
+              <button
+                onClick={() => setTxTypeFilter("withdraw")}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                  txTypeFilter === "withdraw"
+                    ? "bg-rose-600 text-white"
+                    : "bg-slate-800 text-slate-400 hover:text-white"
+                }`}
+              >
+                Rút Tiền
+              </button>
             </div>
           </div>
 
@@ -853,6 +896,14 @@ export default function AdminPage() {
                           </span>
                         ) : (
                           <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                            <button
+                              onClick={() => setHistoryCustomer(c)}
+                              className="bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1 shadow-sm"
+                              title="Xem lịch sử nạp/rút"
+                            >
+                              <History className="h-3.5 w-3.5" /> Lịch Sử
+                            </button>
+
                             <button
                               onClick={() => handleOpenAddMoneyModal(c)}
                               className="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors cursor-pointer inline-flex items-center gap-1 shadow-sm"
@@ -1192,6 +1243,159 @@ export default function AdminPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* CUSTOMER HISTORY MODAL */}
+      {historyCustomer && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl overflow-hidden shadow-2xl space-y-4 p-6 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center font-bold">
+                  <History className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    Lịch Sử Nạp / Rút Khách Hàng #{historyCustomer.id}
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Khách hàng: <strong className="text-white">{historyCustomer.fullName}</strong> ({historyCustomer.phone})
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setHistoryCustomer(null)}
+                className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Summary Cards */}
+            {(() => {
+              const customerTxs = transactions.filter((t) => t.userId === historyCustomer.id);
+              const totalApprovedDeposit = customerTxs
+                .filter((t) => t.type === "deposit" && t.status === "approved")
+                .reduce((sum, t) => sum + Number(t.amount), 0);
+              const totalApprovedWithdraw = customerTxs
+                .filter((t) => t.type === "withdraw" && t.status === "approved")
+                .reduce((sum, t) => sum + Number(t.amount), 0);
+
+              return (
+                <div className="space-y-4 flex-1 overflow-hidden flex flex-col min-h-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 shrink-0">
+                    <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
+                      <span className="text-[11px] text-slate-400 font-medium">Số Dư Ví Hiện Tại</span>
+                      <p className="text-lg font-black text-emerald-400 font-mono">
+                        {formatVND(Number(historyCustomer.balance || 0))}
+                      </p>
+                    </div>
+                    <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
+                      <span className="text-[11px] text-slate-400 font-medium">Tổng Đã Duyệt Nạp</span>
+                      <p className="text-lg font-black text-emerald-400 font-mono">
+                        {formatVND(totalApprovedDeposit)}
+                      </p>
+                    </div>
+                    <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
+                      <span className="text-[11px] text-slate-400 font-medium">Tổng Đã Duyệt Rút</span>
+                      <p className="text-lg font-black text-rose-400 font-mono">
+                        {formatVND(totalApprovedWithdraw)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Transactions Table for this customer */}
+                  <div className="flex-1 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950 min-h-0">
+                    <table className="w-full text-center text-xs text-slate-300 border-collapse">
+                      <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-400 uppercase font-semibold z-10">
+                        <tr>
+                          <th className="py-3 px-3 text-center border-r border-slate-800">Mã GD</th>
+                          <th className="py-3 px-3 text-center border-r border-slate-800">Loại GD</th>
+                          <th className="py-3 px-3 text-center border-r border-slate-800">Số Tiền</th>
+                          <th className="py-3 px-3 text-center border-r border-slate-800">Nội Dung / Ghi Chú</th>
+                          <th className="py-3 px-3 text-center border-r border-slate-800">Ngân Hàng</th>
+                          <th className="py-3 px-3 text-center border-r border-slate-800">Thời Gian</th>
+                          <th className="py-3 px-3 text-center">Trạng Thái</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800">
+                        {customerTxs.length === 0 ? (
+                          <tr>
+                            <td colSpan={7} className="py-8 text-center text-slate-500">
+                              Khách hàng này chưa có lịch sử nạp hoặc rút tiền nào
+                            </td>
+                          </tr>
+                        ) : (
+                          customerTxs.map((tx) => (
+                            <tr key={tx.id} className="hover:bg-slate-800/40 transition-colors">
+                              <td className="py-3 px-3 text-center font-bold text-white border-r border-slate-800">#{tx.id}</td>
+                              <td className="py-3 px-3 text-center border-r border-slate-800">
+                                {tx.type === "deposit" ? (
+                                  <span className="inline-flex items-center gap-1 text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md">
+                                    <ArrowDownToLine className="h-3 w-3" /> Nạp Tiền
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 text-rose-400 font-bold bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-md">
+                                    <ArrowUpFromLine className="h-3 w-3" /> Rút Tiền
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-3 px-3 text-center font-black text-sm text-white font-mono border-r border-slate-800">
+                                {formatVND(Number(tx.amount))}
+                              </td>
+                              <td className="py-3 px-3 text-center border-r border-slate-800">
+                                <span className="text-slate-200 font-medium">{tx.note || (tx.type === "deposit" ? "Nạp tiền" : "Rút tiền")}</span>
+                              </td>
+                              <td className="py-3 px-3 text-center border-r border-slate-800">
+                                {tx.bankName ? (
+                                  <div>
+                                    <div className="font-bold text-slate-200">{tx.bankName}</div>
+                                    <div className="text-[11px] text-slate-400 font-mono">{tx.accountNumber}</div>
+                                  </div>
+                                ) : (
+                                  <span className="text-slate-500 italic">—</span>
+                                )}
+                              </td>
+                              <td className="py-3 px-3 text-center text-slate-400 text-[11px] border-r border-slate-800">
+                                {new Date(tx.createdAt).toLocaleString("vi-VN")}
+                              </td>
+                              <td className="py-3 px-3 text-center">
+                                {tx.status === "pending" && (
+                                  <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1">
+                                    <Clock className="h-3 w-3" /> Chờ Duyệt
+                                  </span>
+                                )}
+                                {tx.status === "approved" && (
+                                  <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1">
+                                    <CheckCircle2 className="h-3 w-3" /> Đã Duyệt
+                                  </span>
+                                )}
+                                {tx.status === "rejected" && (
+                                  <span className="bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1">
+                                    <XCircle className="h-3 w-3" /> Từ Chối
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="flex justify-end pt-2 shrink-0 border-t border-slate-800">
+                    <button
+                      onClick={() => setHistoryCustomer(null)}
+                      className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                    >
+                      Đóng Lịch Sử
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}
