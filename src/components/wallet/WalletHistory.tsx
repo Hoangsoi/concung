@@ -135,7 +135,7 @@ export function WalletHistory() {
                   {tx.note || (tx.type === "deposit" ? "Nạp tiền vào ví" : "Rút tiền về ngân hàng")}
                 </div>
                 <div className="text-[11px] text-slate-400 mt-0.5 flex flex-wrap items-center gap-2">
-                  <span>{formatVNDateTime(tx.createdAt)}</span>
+                  <span className="whitespace-nowrap">{formatVNDateTime(tx.createdAt)}</span>
                   <span>•</span>
                   {tx.status === "approved" && (
                     <span className="text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
