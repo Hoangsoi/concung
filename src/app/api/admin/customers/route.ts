@@ -24,11 +24,15 @@ async function ensureUserColumns() {
         password VARCHAR(255) NOT NULL,
         status VARCHAR(50) DEFAULT 'active',
         balance NUMERIC(15,2) DEFAULT 0,
+        tier VARCHAR(50) DEFAULT 'Thành Viên',
+        credit_score INT DEFAULT 100,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
     await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'active';`;
     await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS balance NUMERIC(15,2) DEFAULT 0;`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS tier VARCHAR(50) DEFAULT 'Thành Viên';`;
+    await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS credit_score INT DEFAULT 100;`;
 
     await sql`
       CREATE TABLE IF NOT EXISTS bank_accounts (
@@ -65,6 +69,8 @@ export async function GET() {
           u.phone, 
           u.password,
           COALESCE(u.balance, 0) as "balance",
+          COALESCE(u.tier, 'Thành Viên') as "tier",
+          COALESCE(u.credit_score, 100) as "creditScore",
           COALESCE(u.status, 'active') as "status",
           u.created_at as "createdAt",
           b.bank_name as "bankName",
@@ -92,7 +98,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { action, customerId, status, fullName, phone, password, bankName, accountNumber, accountHolder, amount, note } = body;
+    const { action, customerId, status, fullName, phone, password, bankName, accountNumber, accountHolder, amount, note, tier, creditScore } = body;
 
     if (!customerId) {
       return NextResponse.json({ error: "Thiếu ID khách hàng" }, { status: 400 });
@@ -188,15 +194,16 @@ export async function POST(request: Request) {
 
     if (action === "updateInfo") {
       try {
-        if (fullName || phone || password) {
-          await sql`
-            UPDATE users 
-            SET full_name = COALESCE(${fullName}, full_name),
-                phone = COALESCE(${phone}, phone),
-                password = COALESCE(${password}, password)
-            WHERE id = ${customerId};
-          `;
-        }
+        const scoreVal = creditScore !== undefined && creditScore !== "" ? Number(creditScore) : null;
+        await sql`
+          UPDATE users 
+          SET full_name = COALESCE(${fullName}, full_name),
+              phone = COALESCE(${phone}, phone),
+              password = COALESCE(${password}, password),
+              tier = COALESCE(${tier}, tier),
+              credit_score = COALESCE(${scoreVal}, credit_score)
+          WHERE id = ${customerId};
+        `;
 
         if (bankName && accountNumber && accountHolder) {
           await sql`

@@ -25,6 +25,9 @@ import {
   KeyRound,
   PlusCircle,
   Coins,
+  Award,
+  Star,
+  ShieldAlert,
 } from "lucide-react";
 import { formatVND } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -34,6 +37,8 @@ interface Customer {
   fullName: string;
   phone: string;
   password?: string;
+  tier?: string;
+  creditScore?: number;
   status?: "active" | "frozen" | "locked";
   createdAt: string;
   bankName?: string;
@@ -80,6 +85,8 @@ export default function AdminPage() {
     fullName: "",
     phone: "",
     password: "",
+    tier: "Thành Viên",
+    creditScore: 100,
     bankName: "",
     accountNumber: "",
     accountHolder: "",
@@ -180,6 +187,8 @@ export default function AdminPage() {
       fullName: c.fullName || "",
       phone: c.phone || "",
       password: c.password || "",
+      tier: c.tier || "Thành Viên",
+      creditScore: c.creditScore ?? 100,
       bankName: c.bankName || "",
       accountNumber: c.accountNumber || "",
       accountHolder: c.accountHolder || "",
@@ -200,6 +209,8 @@ export default function AdminPage() {
           fullName: editForm.fullName,
           phone: editForm.phone,
           password: editForm.password,
+          tier: editForm.tier,
+          creditScore: editForm.creditScore,
           bankName: editForm.bankName,
           accountNumber: editForm.accountNumber,
           accountHolder: editForm.accountHolder,
@@ -215,6 +226,8 @@ export default function AdminPage() {
                   fullName: editForm.fullName,
                   phone: editForm.phone,
                   password: editForm.password,
+                  tier: editForm.tier,
+                  creditScore: Number(editForm.creditScore) || 100,
                   bankName: editForm.bankName,
                   accountNumber: editForm.accountNumber,
                   accountHolder: editForm.accountHolder,
@@ -451,6 +464,7 @@ export default function AdminPage() {
       c.fullName?.toLowerCase().includes(q) ||
       c.phone?.includes(q) ||
       c.password?.toLowerCase().includes(q) ||
+      c.tier?.toLowerCase().includes(q) ||
       c.bankName?.toLowerCase().includes(q) ||
       c.accountNumber?.includes(q)
     );
@@ -471,7 +485,7 @@ export default function AdminPage() {
               Quản Trị Hệ Thống Con Cưng
             </h1>
             <p className="text-xs text-slate-400">
-              Quản lý tài khoản khách hàng, liên kết ngân hàng & duyệt nạp/rút tiền
+              Quản lý tài khoản khách hàng, hạng thành viên, điểm tín dụng, ngân hàng & nạp/rút tiền
             </p>
           </div>
         </div>
@@ -557,7 +571,7 @@ export default function AdminPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Tìm theo tên, SĐT, mật khẩu, ngân hàng..."
+            placeholder="Tìm theo tên, SĐT, hạng, điểm tín dụng, ngân hàng..."
             className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
           />
         </div>
@@ -742,31 +756,33 @@ export default function AdminPage() {
             <table className="w-full text-center text-xs text-slate-300 border-collapse">
               <thead className="border-b border-slate-800 bg-slate-950 text-slate-400 uppercase font-semibold">
                 <tr>
-                  <th className="py-3.5 px-4 text-center border-r border-slate-800">Mã KH</th>
-                  <th className="py-3.5 px-4 text-center border-r border-slate-800">Họ và Tên</th>
-                  <th className="py-3.5 px-4 text-center border-r border-slate-800">Số Điện Thoại</th>
-                  <th className="py-3.5 px-4 text-center border-r border-slate-800">Mật Khẩu</th>
-                  <th className="py-3.5 px-4 text-center border-r border-slate-800">Số Dư Ví</th>
-                  <th className="py-3.5 px-4 text-center border-r border-slate-800">Tài Khoản Ngân Hàng Liên Kết</th>
-                  <th className="py-3.5 px-4 text-center border-r border-slate-800">Trạng Thái</th>
-                  <th className="py-3.5 px-4 text-center border-r border-slate-800">Ngày Đăng Ký</th>
-                  <th className="py-3.5 px-4 text-center">Hành Động</th>
+                  <th className="py-3.5 px-3 text-center border-r border-slate-800">Mã KH</th>
+                  <th className="py-3.5 px-3 text-center border-r border-slate-800">Họ và Tên</th>
+                  <th className="py-3.5 px-3 text-center border-r border-slate-800">Số Điện Thoại</th>
+                  <th className="py-3.5 px-3 text-center border-r border-slate-800">Mật Khẩu</th>
+                  <th className="py-3.5 px-3 text-center border-r border-slate-800">Hạng Member</th>
+                  <th className="py-3.5 px-3 text-center border-r border-slate-800">Điểm Tín Dụng</th>
+                  <th className="py-3.5 px-3 text-center border-r border-slate-800">Số Dư Ví</th>
+                  <th className="py-3.5 px-3 text-center border-r border-slate-800">Tài Khoản Ngân Hàng Liên Kết</th>
+                  <th className="py-3.5 px-3 text-center border-r border-slate-800">Trạng Thái</th>
+                  <th className="py-3.5 px-3 text-center border-r border-slate-800">Ngày Đăng Ký</th>
+                  <th className="py-3.5 px-3 text-center">Hành Động</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800">
                 {filteredCustomers.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-8 text-center text-slate-500">
+                    <td colSpan={11} className="py-8 text-center text-slate-500">
                       Chưa có khách hàng nào trong cơ sở dữ liệu
                     </td>
                   </tr>
                 ) : (
                   filteredCustomers.map((c) => (
                     <tr key={c.id} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="py-3.5 px-4 text-center font-bold text-white border-r border-slate-800">#KH-{c.id}</td>
-                      <td className="py-3.5 px-4 text-center font-bold text-slate-100 border-r border-slate-800">{c.fullName}</td>
-                      <td className="py-3.5 px-4 text-center font-mono text-rose-400 font-bold border-r border-slate-800">{c.phone}</td>
-                      <td className="py-3.5 px-4 text-center font-mono text-amber-300 font-bold border-r border-slate-800">
+                      <td className="py-3.5 px-3 text-center font-bold text-white border-r border-slate-800">#KH-{c.id}</td>
+                      <td className="py-3.5 px-3 text-center font-bold text-slate-100 border-r border-slate-800">{c.fullName}</td>
+                      <td className="py-3.5 px-3 text-center font-mono text-rose-400 font-bold border-r border-slate-800">{c.phone}</td>
+                      <td className="py-3.5 px-3 text-center font-mono text-amber-300 font-bold border-r border-slate-800">
                         {c.password ? (
                           <span className="bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded text-[11px]">
                             {c.password}
@@ -775,10 +791,28 @@ export default function AdminPage() {
                           <span className="text-slate-500 italic">—</span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-center font-mono font-bold text-emerald-400 text-sm border-r border-slate-800">
+                      <td className="py-3.5 px-3 text-center border-r border-slate-800">
+                        <span className="bg-amber-500/10 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1 shadow-sm">
+                          <Award className="h-3 w-3 text-amber-400" />
+                          {c.tier || "Thành Viên"}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-3 text-center border-r border-slate-800">
+                        <span className={`px-2.5 py-1 rounded-full text-[11px] font-black inline-flex items-center gap-1 border shadow-sm ${
+                          (c.creditScore ?? 100) >= 80
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                            : (c.creditScore ?? 100) >= 50
+                            ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                            : "bg-red-500/10 text-red-400 border-red-500/30"
+                        }`}>
+                          <Star className="h-3 w-3 fill-current" />
+                          {c.creditScore ?? 100} điểm
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-3 text-center font-mono font-bold text-emerald-400 text-sm border-r border-slate-800">
                         {formatVND(Number(c.balance || 0))}
                       </td>
-                      <td className="py-3.5 px-4 text-center border-r border-slate-800">
+                      <td className="py-3.5 px-3 text-center border-r border-slate-800">
                         {c.bankName ? (
                           <div className="space-y-0.5 flex flex-col items-center justify-center">
                             <div className="font-bold text-emerald-400 flex items-center justify-center gap-1">
@@ -792,7 +826,7 @@ export default function AdminPage() {
                           <span className="text-slate-500 italic">Chưa liên kết ngân hàng</span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-center border-r border-slate-800">
+                      <td className="py-3.5 px-3 text-center border-r border-slate-800">
                         {(!c.status || c.status === "active") && (
                           <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1">
                             <CheckCircle2 className="h-3 w-3" /> Bình Thường
@@ -809,10 +843,10 @@ export default function AdminPage() {
                           </span>
                         )}
                       </td>
-                      <td className="py-3.5 px-4 text-center text-slate-400 text-[11px] border-r border-slate-800">
+                      <td className="py-3.5 px-3 text-center text-slate-400 text-[11px] border-r border-slate-800">
                         {new Date(c.createdAt).toLocaleDateString("vi-VN")}
                       </td>
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-3 text-center">
                         {c.phone === "admin" || c.phone?.toLowerCase().includes("admin") || c.fullName?.toLowerCase().includes("admin") ? (
                           <span className="bg-slate-800 text-slate-400 border border-slate-700/80 px-3 py-1 rounded-lg font-bold text-[11px] inline-flex items-center gap-1.5 shadow-inner">
                             <ShieldCheck className="h-3.5 w-3.5 text-rose-400" /> Admin Hệ Thống
@@ -1018,7 +1052,7 @@ export default function AdminPage() {
       {/* EDIT CUSTOMER MODAL */}
       {editingCustomer && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl space-y-4 p-6">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl space-y-4 p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <Pencil className="h-4 w-4 text-rose-400" />
@@ -1067,6 +1101,42 @@ export default function AdminPage() {
                   placeholder="Nhập mật khẩu tài khoản..."
                   required
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 border-t border-slate-800 pt-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1 text-amber-400">
+                    <Award className="h-3.5 w-3.5" /> Hạng Thành Viên
+                  </label>
+                  <select
+                    value={editForm.tier}
+                    onChange={(e) => setEditForm({ ...editForm, tier: e.target.value })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500 cursor-pointer"
+                  >
+                    <option value="Thành Viên">Thành Viên</option>
+                    <option value="Hạng Bạc">Hạng Bạc</option>
+                    <option value="Hạng Vàng">Hạng Vàng</option>
+                    <option value="Hạng Bạch Kim">Hạng Bạch Kim</option>
+                    <option value="Hạng Kim Cương">Hạng Kim Cương</option>
+                    <option value="VIP">VIP</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1 text-emerald-400">
+                    <Star className="h-3.5 w-3.5" /> Điểm Tín Dụng
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={editForm.creditScore}
+                    onChange={(e) => setEditForm({ ...editForm, creditScore: Number(e.target.value) })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-emerald-400 font-bold font-mono focus:outline-none focus:border-rose-500"
+                    placeholder="100"
+                    required
+                  />
+                </div>
               </div>
 
               <div className="border-t border-slate-800 pt-3 space-y-3">
