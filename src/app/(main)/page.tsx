@@ -29,7 +29,7 @@ import { SidePromoBanner } from "@/components/common/SidePromoBanner";
 
 export default function HomePage() {
   return (
-    <div className="max-w-container mx-auto px-3 pt-2 pb-5 sm:pb-6 relative md:pointer-events-none md:select-none">
+    <div className="max-w-container mx-auto px-3 pt-2 pb-5 sm:pb-6 relative pointer-events-none select-none">
       {/* Floating Side Promotional Banner */}
       <SidePromoBanner />
 

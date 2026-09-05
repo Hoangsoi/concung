@@ -131,9 +131,8 @@ export function Header() {
           </div>
 
           {/* Mobile Right Cart Button */}
-          <div className="flex items-center gap-2 md:hidden">
-            <Link
-              href="/cart"
+          <div className="flex items-center gap-2 md:hidden pointer-events-none">
+            <div
               className="relative p-2 rounded-xl bg-rose-50 text-[#ED1B68] font-bold text-xs"
             >
               <ShoppingCart className="h-5 w-5" />
@@ -142,12 +141,12 @@ export function Header() {
                   {totalItems}
                 </span>
               )}
-            </Link>
+            </div>
           </div>
         </div>
 
         {/* Mobile Search Input Row */}
-        <div className="mt-2.5 md:hidden">
+        <div className="mt-2.5 md:hidden pointer-events-none">
           <SearchBar placeholder="Tìm sản phẩm cho bé..." />
         </div>
       </div>
