@@ -10,6 +10,25 @@ declare global {
   }
 }
 
+export function openCrispChat() {
+  if (typeof window !== "undefined") {
+    window.$crisp = window.$crisp || [];
+    window.$crisp.push(["do", "chat:show"]);
+    window.$crisp.push(["do", "chat:open"]);
+
+    // Retry opening to ensure Crisp SDK processes command after async load
+    let count = 0;
+    const timer = setInterval(() => {
+      count++;
+      if (typeof window !== "undefined" && window.$crisp) {
+        window.$crisp.push(["do", "chat:show"]);
+        window.$crisp.push(["do", "chat:open"]);
+      }
+      if (count >= 5) clearInterval(timer);
+    }, 400);
+  }
+}
+
 export function CrispChat() {
   const pathname = usePathname();
 
@@ -25,21 +44,19 @@ export function CrispChat() {
       s.async = true;
       d.getElementsByTagName("head")[0].appendChild(s);
 
-      // Hide floating Crisp icon by default so it never covers the bottom nav or other pages
       window.$crisp.push(["safe", true]);
-      window.$crisp.push(["do", "chat:hide"]);
     }
   }, []);
 
-  // Control Crisp visibility dynamically per route
+  // Route change listener: Auto-open Crisp on /cskh, auto-hide on all other pages
   useEffect(() => {
     if (typeof window === "undefined" || !window.$crisp) return;
 
     if (pathname === "/cskh" || pathname.startsWith("/cskh/")) {
-      // On CSKH page: Crisp remains hidden until user triggers chat or can be opened
-      window.$crisp.push(["do", "chat:hide"]);
+      // Automatically open Crisp chat when arriving on CSKH page
+      openCrispChat();
     } else {
-      // On any other page (Trang chủ, Lịch sử, Ví, Tôi...): forcibly close and hide Crisp
+      // Forcibly close and hide Crisp chat on any non-CSKH page (Trang chủ, Lịch sử, Ví, Tôi)
       window.$crisp.push(["do", "chat:close"]);
       window.$crisp.push(["do", "chat:hide"]);
     }
@@ -54,7 +71,7 @@ export function CrispChat() {
         "on",
         "chat:closed",
         () => {
-          // Immediately hide Crisp floating icon when user closes the chat window
+          // Hide floating bubble when user closes chat window
           window.$crisp.push(["do", "chat:hide"]);
         },
       ]);
@@ -64,12 +81,4 @@ export function CrispChat() {
   }, []);
 
   return null;
-}
-
-export function openCrispChat() {
-  if (typeof window !== "undefined") {
-    window.$crisp = window.$crisp || [];
-    window.$crisp.push(["do", "chat:show"]);
-    window.$crisp.push(["do", "chat:open"]);
-  }
 }
